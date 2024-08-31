@@ -15,8 +15,12 @@ var sent: bool
 func _ready() -> void:
 	#_client.connect("data", _print_server_data)
 	add_child(_client)
+	
 	await _client.connect_to_host(HOST, PORT)
 	sent = false
+	
+	var s = UltraMekGD.new()
+	print("Sumx2: ", s.doubling(60))
 	
 func _process(delta: float) -> void:
 	var fname: String = "test/samples/snow.board"
