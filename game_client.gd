@@ -13,14 +13,12 @@ var _client: Client = Client.new()
 var sent: bool
 
 func _ready() -> void:
+	await _init_cpp_bindings()
 	#_client.connect("data", _print_server_data)
 	add_child(_client)
-	
 	await _client.connect_to_host(HOST, PORT)
 	sent = false
 	
-	var s = UltraMekGD.new()
-	print("Sumx2: ", s.doubling(60))
 	
 func _process(delta: float) -> void:
 	var fname: String = "test/samples/snow.board"
@@ -48,3 +46,11 @@ func request_map(filename: String) -> String:
 		rdict[MAP_RQ] = {"filename":filename}
 		var output: String = JSON.stringify(rdict) + '\n'
 		return output
+
+func _init_cpp_bindings() -> void:
+	var s = UltraMekGD.new()
+	s.set_unit_length(2.0)
+	print("Sumx2: ", s.doubling(60))
+	print("Unit Length: ", s.get_unit_length())
+	var centers = s.create_grid_centers(16,17)
+	print("Centers: ",centers)
