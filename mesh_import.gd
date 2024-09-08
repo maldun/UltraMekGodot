@@ -47,10 +47,11 @@ func _ready() -> void:
 	
 	for k in range(len(data['top_verts'])):
 		var vert = data['top_verts'][k]
+		var unit_length = float(data['length'])
 		top_verts.append(Vector3(vert[0],vert[2],vert[1]))
-		var U = vert[0]+1.0
-		var V = vert[1]+1.0
-		var local_norm = 2 #(U**2+V**2)**0.5
+		var U = vert[0]+unit_length
+		var V = vert[1]+unit_length
+		var local_norm = 2*unit_length 
 		var uv_coord = Vector2(U/(local_norm),V/(local_norm))
 		print("uv",k,": ",uv_coord)
 		top_uvs.append(uv_coord)
