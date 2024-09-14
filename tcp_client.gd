@@ -16,6 +16,7 @@ var _timeout: float = 0.1
 func _ready() -> void:
 	_status = _stream.get_status()
 	_stream.set_no_delay(true)
+	print("TCP Started")
 
 func _process(delta: float) -> void:
 	var new_status: int = _stream.get_status()

@@ -1,20 +1,25 @@
-[gd_scene load_steps=5 format=3 uid="uid://c0i86keueputb"]
+[gd_scene load_steps=4 format=3 uid="uid://wrr7vj3ftaot"]
 
-[ext_resource type="Script" path="res://game_client.gd" id="1_833t5"]
-[ext_resource type="Script" path="res://mesh_import.gd" id="3_fmiru"]
-[ext_resource type="ArrayMesh" uid="uid://wpkai8y2e6ra" path="res://map.tres" id="3_w1klj"]
+[ext_resource type="Script" path="res://draw_board.gd" id="1_11avm"]
+[ext_resource type="Script" path="res://Hex.gd" id="2_twspg"]
 
-[sub_resource type="ArrayMesh" id="ArrayMesh_5hphy"]
+[sub_resource type="ArrayMesh" id="ArrayMesh_h3h4k"]
 
 [node name="Board3D" type="Node3D"]
 
-[node name="TCP Client" type="Node" parent="."]
-script = ExtResource("1_833t5")
+[node name="Board_StaticBody3D" type="StaticBody3D" parent="."]
+script = ExtResource("1_11avm")
 
-[node name="BoardGen" type="MeshInstance3D" parent="."]
-mesh = SubResource("ArrayMesh_5hphy")
-script = ExtResource("3_fmiru")
+[node name="BoardBase" type="Node3D" parent="."]
+script = ExtResource("1_11avm")
 
-[node name="Map" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 364.636, 1097.52, -174.056)
-mesh = ExtResource("3_w1klj")
+[node name="Hex" type="MeshInstance3D" parent="BoardBase"]
+visibility_parent = NodePath(".")
+mesh = SubResource("ArrayMesh_h3h4k")
+script = ExtResource("2_twspg")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.99236, 17.2814, -8.03047)
+light_energy = 16.0
+light_indirect_energy = 16.0
+omni_range = 4096.0

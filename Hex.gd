@@ -1,20 +1,21 @@
+class_name Hex
 extends MeshInstance3D
 
 const unit_length = 1.0
 const unit_height = 0.5
 
-
-
 const top_mat = "res://grass_h_swamp_0.png"
 const color_norm = 255
+
 const type_map = {"snow":Vector3(204,255,255)/color_norm,
 				  "grass":Vector3(0,255,0)/color_norm
 				}
-
+				
 var texture = preload(top_mat)
 var rgb = Vector3(0,1,0)
 var material = StandardMaterial3D.new()
 var material2 = StandardMaterial3D.new()
+var center
 
 func get_json_data(fname: String) -> Dictionary:
 	var file = FileAccess.open(fname,FileAccess.READ)
@@ -138,13 +139,14 @@ func create_hex(center: Vector2,hex_fname: String,bot_mat,top_mat,mat_count: int
 	
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	
-	material.albedo_color = Color(rgb[0], rgb[1], rgb[2])
+	pass
+	#material.albedo_color = Color(rgb[0], rgb[1], rgb[2])
 	material2.albedo_texture = texture
 	
-	#create_hex(Vector2(1,1),"res://hexa_h9.json",material,material2)
-	create_board("res://test_json.json")
-	ResourceSaver.save(mesh, "res://map.tres", ResourceSaver.FLAG_COMPRESS)
+	
+	#create_hex(center,"res://assets/hexes/hexa_h9.json",material,material2,0)
+	#create_board("res://test_json.json")
+	#ResourceSaver.save(mesh, "res://map.tres", ResourceSaver.FLAG_COMPRESS)
 	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

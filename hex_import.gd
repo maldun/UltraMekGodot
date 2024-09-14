@@ -3,14 +3,13 @@ extends MeshInstance3D
 const unit_length = 1.0
 const unit_height = 0.5
 
-
-
 const top_mat = "res://grass_h_swamp_0.png"
 const color_norm = 255
+
 const type_map = {"snow":Vector3(204,255,255)/color_norm,
 				  "grass":Vector3(0,255,0)/color_norm
 				}
-
+				
 var texture = preload(top_mat)
 var rgb = Vector3(0,1,0)
 var material = StandardMaterial3D.new()

@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://cx5vf6mi3bg8g"]
+
+[ext_resource type="Script" path="res://game_client.gd" id="1_1lw06"]
+[ext_resource type="PackedScene" uid="uid://wrr7vj3ftaot" path="res://board3d.tscn" id="1_mllqf"]
+
+[node name="Main" type="Node"]
+
+[node name="TCPClient" type="Node" parent="."]
+script = ExtResource("1_1lw06")
+
+[node name="camera_pivot_ Marker3D" type="Marker3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="camera_pivot_ Marker3D"]
+transform = Transform3D(1, 0, 0, 0, 0.543658, 0.839307, 0, -0.839307, 0.543658, -1.15887, 29.7841, 6.08018)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="camera_pivot_ Marker3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 27.3813, -41.8089)
+light_energy = 10.02
+light_indirect_energy = 12.19
+light_size = 0.889
+omni_range = 429.398
+
+[node name="Board3D" parent="." instance=ExtResource("1_mllqf")]
