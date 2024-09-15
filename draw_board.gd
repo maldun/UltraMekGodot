@@ -2,6 +2,7 @@ extends Node3D
 
 const unit_length = 1.0
 const unit_height = 0.5
+const PNG = ".png"
 
 const top_mat = "res://grass_h_swamp_0.png"
 const color_norm = 255
@@ -13,6 +14,9 @@ const type_map = {"snow":Vector3(204,255,255)/color_norm,
 const texture_folders = {"snow":"res://assets/hexes/snow/",
 				  "grass": "res://assets/hexes/grass/"
 				}
+
+var flat: bool = false
+var flat_level: int = -2
 
 func get_json_data(fname: String) -> Dictionary:
 	var file = FileAccess.open(fname,FileAccess.READ)
@@ -37,25 +41,60 @@ func get_texture(data: Dictionary,xi: int,yj: int):
 	var rough: int = int(data["rough"][xi][yj])
 	var wood: int = int(data["woods"][xi][yj])
 	var swamp: int = int(data["swamp"][xi][yj])
-	
+	var water: int = int(data["water"][xi][yj])
+	var road = data["road"][xi][yj]
+	var texture_fname: String
+	var folder = texture_folders[ttype]
 	
 	if ttype == "snow":
-		return get_snow_tile(height,rough,wood,swamp)
+		texture_fname = get_snow_tile(height,rough,wood,swamp,water)
 	
+	if road[0] > 0:
+		texture_fname = get_road_tile(texture_fname,road)
 	
+	texture_fname = folder + texture_fname
+	print("texture fname: ",texture_fname)
+	return load(texture_fname)
+	
+func get_road_tile(tile_fname: String, road) -> String:
+	var fname: String = "road" + ("%02d" % road[1]) + "_" + tile_fname
+	print("Road: ",fname)
+	return "road/" + fname
 			
-func get_snow_tile(height,rough,wood,swamp):
-	var folder = texture_folders["snow"]
+func get_snow_tile(height: int,rough: int,wood: int,swamp: int,water: int) -> String:
+	var rng = RandomNumberGenerator.new()
+	
 	if wood > 0:
 		if wood == 1:
-			return folder + "snow_lf.png"
+			return "snow_l_woods_" + str(rng.randi_range(0,2)) + PNG
 		elif wood == 2:
-			return folder + "snow_hf.png"
+			return "snow_h_woods_" + str(rng.randi_range(0,2)) + PNG
 	if rough > 0:
-		return folder + "snow_rough_" + str(rough) + ".png"
-		
-	return folder + "snow_" + str(height) + ".png"
+		return "snow_rough_" + str(rough) + PNG
 	
+	if water > 0:
+		return "snow_water_" + str(water) + PNG
+	
+	return "snow_" + str(height) + PNG
+
+func label_text(data: Dictionary,i: int ,j: int) -> String:
+	var water: int = data["water"][i][j]
+	var height: int = data["heights"][i][j]
+	var rough: int = data["rough"][i][j]
+	var woods: int = data["woods"][i][j]
+	var label: String = ""
+	
+	if water > 0:
+		label = label + "Depth " + str(water) + "\n"
+	elif rough > 0:
+		label += "Rough\n"
+	elif woods > 0:
+		label += "Woods" + str(woods) + "\n"
+		
+	label += "Lvl" + str(height)
+	return label
+	
+
 func create_board(fname: String) -> void:
 	# set cpp helpers
 	var s = UltraMekGD.new()
@@ -86,17 +125,20 @@ func create_board(fname: String) -> void:
 	print("form string: ", format_x)
 	
 	
-	var mat_count = 0
 	for i in range(size_x):
 		for j in range(size_y):
 			var x = centers[i][j][0]
 			var y = centers[i][j][1]
 			var height = heights[i][j]
 			#print("Height: ",height," i: ",i," j: ",j," x: ",x," y: ",y)
-			var json_name = "res://assets/hexes/hexa_h{hh}.json".format({"hh":height})
+			var json_name: String = "res://assets/hexes/hexa_h{hh}.json"
+			if flat == false:
+				json_name = json_name.format({"hh":height})
+			else:
+				json_name = json_name.format({"hh":flat_level})
 			var material = mat_map[ttypes[i][j]]
-			var texture_fname = get_texture(data,i,j)
-			var texture = load(texture_fname)
+			var texture = get_texture(data,i,j)
+			
 			var material2 = StandardMaterial3D.new()
 			material2.albedo_texture = texture
 			
@@ -106,10 +148,11 @@ func create_board(fname: String) -> void:
 			hex.mesh = ArrayMesh.new()
 			hex.material = material
 			
-			
-			hex.create_hex(Vector2(x,y),json_name,material,material2,mat_count)
+			hex.create_hex(Vector2(x,y),json_name,material,material2)
+			var text_color: Color = Color(1,1,1)
+			var label_text: String = label_text(data,i,j)
+			hex.add_label(label_text,text_color)
 			add_child(hex)
-			#mat_count += 1
 	
 
 

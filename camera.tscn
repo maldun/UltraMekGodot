@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://bx4ejyq6xfdbq"]
+
+[ext_resource type="Script" path="res://camera.gd" id="1_v6ot6"]
+
+[node name="camera_pivot_ Marker3D" type="Marker3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.93856, 0, 3.95731)
+script = ExtResource("1_v6ot6")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.688747, 0.725002, 0, -0.725002, 0.688747, -4.83069, 11.2309, -7.21922)
