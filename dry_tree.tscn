@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dgvarkhysydhs"]
+
+[ext_resource type="PackedScene" uid="uid://dxvvbt1h3i77w" path="res://assets/hexes/decorations/wood/dry_treeglb.glb" id="1_pwjmf"]
+
+[node name="dry_treeglb" instance=ExtResource("1_pwjmf")]
+
+[node name="Dry Tree" parent="." index="0"]
+transform = Transform3D(0.001, 0, 0, 0, 0.001, 0, 0, 0, 0.001, 0, 0, 0)

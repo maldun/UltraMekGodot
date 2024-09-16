@@ -11,6 +11,9 @@ const type_map = {"snow":Vector3(204,255,255)/color_norm,
 				  "grass":Vector3(0,255,0)/color_norm
 				}
 				
+				
+				
+				
 const texture_folders = {"snow":"res://assets/hexes/snow/",
 				  "grass": "res://assets/hexes/grass/"
 				}
@@ -28,6 +31,8 @@ func get_json_data(fname: String) -> Dictionary:
 	
 func create_material_map() -> Dictionary:
 	var materials = {}
+	
+	
 	for key in type_map.keys():
 		var rgb = type_map[key]
 		var mat = StandardMaterial3D.new()
@@ -35,7 +40,7 @@ func create_material_map() -> Dictionary:
 		materials[key] = mat
 	return materials
 	
-func get_texture(data: Dictionary,xi: int,yj: int):
+func draw_texture(data: Dictionary,xi: int,yj: int):
 	var ttype: String = data["tile_type"][xi][yj]
 	var height: int = int(data["heights"][xi][yj])
 	var rough: int = int(data["rough"][xi][yj])
@@ -64,11 +69,11 @@ func get_road_tile(tile_fname: String, road) -> String:
 func get_snow_tile(height: int,rough: int,wood: int,swamp: int,water: int) -> String:
 	var rng = RandomNumberGenerator.new()
 	
-	if wood > 0:
-		if wood == 1:
-			return "snow_l_woods_" + str(rng.randi_range(0,2)) + PNG
-		elif wood == 2:
-			return "snow_h_woods_" + str(rng.randi_range(0,2)) + PNG
+	#if wood > 0:
+		#if wood == 1:
+			#return "snow_l_woods_" + str(rng.randi_range(0,2)) + PNG
+		#elif wood == 2:
+			#return "snow_h_woods_" + str(rng.randi_range(0,2)) + PNG
 	if rough > 0:
 		return "snow_rough_" + str(rough) + PNG
 	
@@ -93,7 +98,7 @@ func label_text(data: Dictionary,i: int ,j: int) -> String:
 		
 	label += "Lvl" + str(height)
 	return label
-	
+
 
 func create_board(fname: String) -> void:
 	# set cpp helpers
@@ -137,7 +142,7 @@ func create_board(fname: String) -> void:
 			else:
 				json_name = json_name.format({"hh":flat_level})
 			var material = mat_map[ttypes[i][j]]
-			var texture = get_texture(data,i,j)
+			var texture = draw_texture(data,i,j)
 			
 			var material2 = StandardMaterial3D.new()
 			material2.albedo_texture = texture
@@ -152,6 +157,9 @@ func create_board(fname: String) -> void:
 			var text_color: Color = Color(1,1,1)
 			var label_text: String = label_text(data,i,j)
 			hex.add_label(label_text,text_color)
+			
+			# generate decorations
+			hex.generate_decoration(data,i,j)
 			add_child(hex)
 	
 

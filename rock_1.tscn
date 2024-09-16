@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://bi6sq6fr2qpgj"]
+
+[ext_resource type="PackedScene" uid="uid://h44830pq62f" path="res://assets/hexes/decorations/rocks/rock1.glb" id="1_el7db"]
+
+[node name="rock1" instance=ExtResource("1_el7db")]

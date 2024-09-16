@@ -36,40 +36,6 @@ func create_material_map() -> Dictionary:
 		materials[key] = mat
 	return materials
 		
-func create_board(fname: String) -> void:
-	# set cpp helpers
-	var s = UltraMekGD.new()
-	s.set_unit_length(unit_length)
-	var data = get_json_data(fname)
-	var heights = data["heights"]
-	var ttypes = data["tile_type"]
-	var mat_map = create_material_map()
-	var size_x = int(data["size_x"])
-	var size_y = int(data["size_y"])
-	var centers = s.create_grid_centers(size_x,size_y)
-	print("Centers: ",len(centers))
-	print("Dimx: ",size_x,"Dimy: ",size_y)
-	
-	# temp code 
-	var texture = preload(top_mat)
-	var rgb = Vector3(0,1,0)
-	#var material = StandardMaterial3D.new()
-	#material.albedo_color = Color(rgb[0], rgb[1], rgb[2])
-	var material2 = StandardMaterial3D.new()
-	material2.albedo_texture = texture
-	
-	var mat_count = 0
-	for i in range(size_x):
-		for j in range(size_y):
-			var x = centers[i][j][0]
-			var y = centers[i][j][1]
-			var height = heights[i][j]
-			print("Height: ",height," i: ",i," j: ",j," x: ",x," y: ",y)
-			var json_name = "res://assets/hexes/hexa_h{hh}.json".format({"hh":height})
-			var material = mat_map[ttypes[i][j]]
-			create_hex(Vector2(x,y),json_name,material,material2,mat_count)
-			mat_count += 1
-	print("Count: ",mat_count)
 
 func create_hex(center: Vector2,hex_fname: String,bot_mat,top_mat,mat_count: int = 0) -> void:
 	
@@ -149,7 +115,35 @@ func add_label(label: String, color: Color)-> void:
 	label3d.rotate_z(PI)
 	label3d.set("theme_override_colors/font_color",color)
 	add_child(label3d)
+
+func generate_decoration(data: Dictionary,i:int,j:int) -> void:
+	var wood: int = int(data["woods"][i][j]) 
+	var ttype: String = data["tile_type"][i][j]
+	if wood > 0:
+		generate_forest(ttype,wood)
+
+func create_rotation_points_on_top(nr: int) -> PackedVector2Array:
+	var result: PackedVector2Array = PackedVector2Array()
+	var angle = 2*PI/nr
+	for k in range(nr):
+		result.append(0.75*unit_length*Vector2(cos(k*angle),sin(k*angle)))
+
+	return result
 		
+func generate_forest(ttype:String,wood:int) -> void:
+	var light_wood:bool = true if wood == 1 else false
+	var scenes = Forest.generate(ttype,self,light_wood)
+	var nr_trees = (Forest.NR_TREES_LIGHT if light_wood == true 
+					else Forest.NR_TREES_HEAVY)
+	var coords = create_rotation_points_on_top(nr_trees)
+	
+	for k in range(len(scenes)):
+		var scene = scenes[k]
+		var c: Vector2 = coords[k]
+		scene.global_transform.origin = Vector3(hex_center[0]+c[0],hex_height,
+								hex_center[1]+c[1])
+		add_child(scene)
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass
