@@ -118,30 +118,52 @@ func add_label(label: String, color: Color)-> void:
 
 func generate_decoration(data: Dictionary,i:int,j:int) -> void:
 	var wood: int = int(data["woods"][i][j]) 
+	var rough: int = int(data["rough"][i][j]) 
 	var ttype: String = data["tile_type"][i][j]
+	
 	if wood > 0:
 		generate_forest(ttype,wood)
-
-func create_rotation_points_on_top(nr: int) -> PackedVector2Array:
+	if rough > 0:
+		generate_rough(ttype,rough)
+		
+func create_rotation_points_on_top(nr: int,shift: float = 0,
+			shorten_radius:float = 0.75)-> PackedVector2Array:
 	var result: PackedVector2Array = PackedVector2Array()
-	var angle = 2*PI/nr
+	var angle: float = 2*PI/nr
+	var R: float = unit_length*shorten_radius
 	for k in range(nr):
-		result.append(0.75*unit_length*Vector2(cos(k*angle),sin(k*angle)))
+		result.append(R*Vector2(cos(k*angle+shift),sin(k*angle+shift)))
 
 	return result
-		
+
 func generate_forest(ttype:String,wood:int) -> void:
 	var light_wood:bool = true if wood == 1 else false
-	var scenes = Forest.generate(ttype,self,light_wood)
+	var scenes = await Forest.generate(ttype,self,light_wood)
 	var nr_trees = (Forest.NR_TREES_LIGHT if light_wood == true 
 					else Forest.NR_TREES_HEAVY)
-	var coords = create_rotation_points_on_top(nr_trees)
+	var coords = await create_rotation_points_on_top(nr_trees)
+	for k in range(len(scenes)):
+		var scene = scenes[k]
+		var c: Vector2 = coords[k]
+		#scene.global_transform.origin = 
+		scene.translate(Vector3(hex_center[0]+c[0],hex_height,
+								hex_center[1]+c[1]))
+		
+		await add_child(scene)
+
+func generate_rough(ttype:String,rough:int) -> void:
+	var light_rough:bool = true if rough == 1 else false
+	var scenes = Rough.generate(ttype,self,light_rough)
+	var nr_stones = (Rough.NR_STONES_LIGHT if light_rough == true 
+					else Rough.NR_STONES_LIGHT)
+	var coords = create_rotation_points_on_top(nr_stones,0)
 	
 	for k in range(len(scenes)):
 		var scene = scenes[k]
 		var c: Vector2 = coords[k]
-		scene.global_transform.origin = Vector3(hex_center[0]+c[0],hex_height,
-								hex_center[1]+c[1])
+		#scene.global_transform.origin = 
+		scene.translate(Vector3(hex_center[0]+c[0],hex_height,
+								hex_center[1]+c[1]))
 		add_child(scene)
 
 # Called when the node enters the scene tree for the first time.

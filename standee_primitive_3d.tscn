@@ -1,0 +1,32 @@
+[gd_scene load_steps=6 format=3 uid="uid://b4kgdygb4srs5"]
+
+[ext_resource type="Script" path="res://init_standee.gd" id="1_8jtql"]
+[ext_resource type="Script" path="res://draw_standee.gd" id="1_gohut"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_2akgy"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ijed2"]
+height = 0.2
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_s522c"]
+
+[node name="StandeePrimitive3D" type="Node3D"]
+script = ExtResource("1_8jtql")
+
+[node name="RigidBody3D" type="RigidBody3D" parent="."]
+disable_mode = 1
+axis_lock_linear_x = true
+axis_lock_linear_z = true
+axis_lock_angular_x = true
+axis_lock_angular_y = true
+axis_lock_angular_z = true
+mass = 0.01
+physics_material_override = SubResource("PhysicsMaterial_2akgy")
+can_sleep = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RigidBody3D"]
+shape = SubResource("CylinderShape3D_ijed2")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RigidBody3D/CollisionShape3D"]
+mesh = SubResource("ArrayMesh_s522c")
+script = ExtResource("1_gohut")

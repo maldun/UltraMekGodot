@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dp1stq45doecq"]
-
-[ext_resource type="PackedScene" uid="uid://4xewjqgq61qx" path="res://assets/hexes/decorations/fir.glb" id="1_u4r8w"]
-
-[node name="fir" instance=ExtResource("1_u4r8w")]

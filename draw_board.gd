@@ -1,3 +1,4 @@
+class_name Board
 extends Node3D
 
 const unit_length = 1.0
@@ -21,13 +22,7 @@ const texture_folders = {"snow":"res://assets/hexes/snow/",
 var flat: bool = false
 var flat_level: int = -2
 
-func get_json_data(fname: String) -> Dictionary:
-	var file = FileAccess.open(fname,FileAccess.READ)
-	var text = file.get_as_text()
-	var json = JSON.new()
-	var json_status = json.parse(text)
-	var data = json.data
-	return data
+
 	
 func create_material_map() -> Dictionary:
 	var materials = {}
@@ -104,7 +99,7 @@ func create_board(fname: String) -> void:
 	# set cpp helpers
 	var s = UltraMekGD.new()
 	s.set_unit_length(unit_length)
-	var data = get_json_data(fname)
+	var data = DataHandler.get_json_data(fname)
 	var heights = data["heights"]
 	var ttypes = data["tile_type"]
 	var mat_map = create_material_map()
@@ -160,7 +155,9 @@ func create_board(fname: String) -> void:
 			
 			# generate decorations
 			hex.generate_decoration(data,i,j)
+			hex.create_convex_collision()
 			add_child(hex)
+			
 	
 
 

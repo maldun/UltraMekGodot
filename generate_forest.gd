@@ -5,9 +5,9 @@ const NR_TREES_LIGHT: int = 3
 const NR_TREES_HEAVY: int = 6
 const PI: float = atan(1)*4
 
-const low_poly_autumn_tree = preload("res://low_poly_tree_autumn.tscn")
-const dry_tree = preload("res://dry_tree.tscn")
-const fir = preload("res://fir2.tscn")
+const low_poly_autumn_tree = preload("res://assets/hexes/scenes/low_poly_tree_autumn.tscn")
+const dry_tree = preload("res://assets/hexes/scenes/dry_tree.tscn")
+const fir = preload("res://assets/hexes/scenes/fir2.tscn")
 
 const tree_map = {"snow": {0:low_poly_autumn_tree,
 						   1:dry_tree,
@@ -15,20 +15,18 @@ const tree_map = {"snow": {0:low_poly_autumn_tree,
 						}
 				}
 
-static func generate(ttype: String, hex: Hex, is_light:bool = true):
+static func generate(ttype: String, hex: Hex, is_light:bool = true)-> Array:
 	var nr_trees: int = NR_TREES_LIGHT if is_light == true else NR_TREES_HEAVY
-	var center: Vector2 = hex.hex_center
-	var height: float = hex.hex_height
-	var unit_length: float = hex.unit_length
-	var radius: float = unit_length*0.9
 	var rng = RandomNumberGenerator.new()
 	var nr_tree_types = len(tree_map[ttype])
-	var scenes = []
+	var scenes: Array = []
 	for k in range(nr_trees):
-		var tree = tree_map[ttype][rng.randi_range(0,nr_tree_types-1)]
-		var tscene = tree.instantiate()
+		var nr: int = rng.randi_range(0,nr_tree_types-1)
+		var tree: PackedScene = await tree_map[ttype][nr]
+		var tscene = await tree.instantiate()
 		tscene.name = hex.name + "_Tree" + str(k)
 		scenes.append(tscene)
+	
 	return scenes
 	
 
