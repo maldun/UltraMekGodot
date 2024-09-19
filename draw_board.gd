@@ -95,11 +95,14 @@ func label_text(data: Dictionary,i: int ,j: int) -> String:
 	return label
 
 
-func create_board(fname: String) -> void:
+func create_board_from_file(fname: String)-> void:
+	var data: Dictionary = DataHandler.get_json_data(fname)
+	create_board(data)
+
+func create_board(data: Dictionary) -> void:
 	# set cpp helpers
 	var s = UltraMekGD.new()
 	s.set_unit_length(unit_length)
-	var data = DataHandler.get_json_data(fname)
 	var heights = data["heights"]
 	var ttypes = data["tile_type"]
 	var mat_map = create_material_map()
@@ -122,7 +125,7 @@ func create_board(fname: String) -> void:
 	
 	var format_x: String = "%0" + str(num_zeros_x) + "d"
 	var format_y: String = "%0" + str(num_zeros_y) + "d"
-	print("form string: ", format_x)
+	#print("form string: ", format_x)
 	
 	
 	for i in range(size_x):
@@ -163,7 +166,8 @@ func create_board(fname: String) -> void:
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	create_board("res://test_json.json")
+	#create_board_from_file("res://test_json.json")
+	pass
 	
 	#add_child(hex)
 	#hex.create_hex(Vector2(2,2),"res://assets/hexes/hexa_h9.json",material,material2,0)
@@ -173,6 +177,13 @@ func _ready() -> void:
 	#hex.mesh = ArrayMesh.new()
 	#hex.create_hex(Vector2(3,3),"res://assets/hexes/hexa_h9.json",material,material2,0)
 	#add_child(hex)
+func _recieved_board(recieved_map) -> void:
+	#print("Recieved Map: ", recieved_map)
+	create_board(recieved_map)
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	pass
+	var mm = get_tree().get_root().get_node("Main")
+	var client_node = mm.get_node("TCPClient")
+	await client_node.connect("recieved_board",_recieved_board)
+	

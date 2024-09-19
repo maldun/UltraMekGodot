@@ -15,7 +15,7 @@ func create_standee(fname: String):
 	var centers = s.create_grid_centers(2,2)
 	var center = centers[0][0]
 	
-#
+	# 
 	hex = Hex.new()
 	var hex_name = "Standee"
 	var material2 = StandardMaterial3D.new()

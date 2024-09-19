@@ -1,5 +1,5 @@
 # code from: https://www.bytesnsprites.com/posts/2021/creating-a-tcp-client-in-godot/
-
+class_name UltraMekTCPClient
 extends Node
 
 signal connected      # Connected to server
@@ -7,18 +7,12 @@ signal data           # Received data from server
 signal disconnected   # Disconnected from server
 signal error          # Error with connection to server
 
+var _connect_tcp: bool = false
 var _status: int = 0
-var _stream: StreamPeerTCP = StreamPeerTCP.new()
-
+var _stream: StreamPeerTCP
 var _timeout: float = 0.1
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	_status = _stream.get_status()
-	_stream.set_no_delay(true)
-	print("TCP Started")
-
-func _process(delta: float) -> void:
+func _process_update(delta: float) -> int:
 	var new_status: int = _stream.get_status()
 	if new_status != _status:
 		_status = new_status
@@ -34,7 +28,22 @@ func _process(delta: float) -> void:
 			_stream.STATUS_ERROR:
 				print("Error with socket stream.")
 				emit_signal("error")
+				
+	return new_status
+				
 
+	
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	_stream = StreamPeerTCP.new()
+	_status = _stream.get_status()
+	_stream.set_no_delay(true)
+	print("Alert: TCP Started")
+	_connect_tcp = false
+
+func _process(delta: float) -> void:
+	var new_status: int = _process_update(delta)
+	
 	#if _status == _stream.STATUS_CONNECTED:
 	#	var available_bytes: int = _stream.get_available_bytes()
 	#	if available_bytes > 0:
