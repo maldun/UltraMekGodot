@@ -45,37 +45,50 @@ func draw_texture(data: Dictionary,xi: int,yj: int):
 	var road = data["road"][xi][yj]
 	var texture_fname: String
 	var folder = texture_folders[ttype]
+	var asset_folder: String = "res://assets/hexes/"
+	var asset_data_dict = DataHandler.get_json_data(asset_folder + "tiles.json")
+	var asset_data = DataHandler.get_json_data(asset_data_dict[ttype])
+	#if ttype == "snow":
+	texture_fname = get_tile(asset_data,height,rough,wood,swamp,water,road)
 	
-	if ttype == "snow":
-		texture_fname = get_snow_tile(height,rough,wood,swamp,water)
-	
-	if road[0] > 0:
-		texture_fname = get_road_tile(texture_fname,road)
-	
-	texture_fname = folder + texture_fname
 	print("texture fname: ",texture_fname)
 	return load(texture_fname)
 	
 func get_road_tile(tile_fname: String, road) -> String:
 	var fname: String = "road" + ("%02d" % road[1]) + "_" + tile_fname
 	print("Road: ",fname)
-	return "road/" + fname
+	return fname
 			
-func get_snow_tile(height: int,rough: int,wood: int,swamp: int,water: int) -> String:
+func get_tile(asset_data: Dictionary, height: int,rough: int,wood: int,swamp: int,water: int,
+			  road) -> String:
 	var rng = RandomNumberGenerator.new()
-	
+	var tile_data = asset_data["tiles"]
 	#if wood > 0:
 		#if wood == 1:
 			#return "snow_l_woods_" + str(rng.randi_range(0,2)) + PNG
 		#elif wood == 2:
 			#return "snow_h_woods_" + str(rng.randi_range(0,2)) + PNG
+	
 	if rough > 0:
-		return "snow_rough_" + str(rough) + PNG
+		print("Rough: ", rough)
+		if "rough" in tile_data.keys():
+			if str(rough) in tile_data["rough"].keys():
+				return tile_data["rough"][str(rough)]
 	
 	if water > 0:
-		return "snow_water_" + str(water) + PNG
+		if "water" in tile_data.keys():
+			if str(water) in tile_data["water"].keys():
+				return tile_data["water"][str(water)]
 	
-	return "snow_" + str(height) + PNG
+	var texture_fname = tile_data["default"][str(height)]
+	print("Road: ",road)
+	if road[0] > 0:
+		texture_fname = get_road_tile(texture_fname,road)
+		texture_fname = asset_data["roads"] + texture_fname
+	else:
+		texture_fname = asset_data["texture_folder"] +texture_fname
+		
+	return texture_fname 
 
 func label_text(data: Dictionary,i: int ,j: int) -> String:
 	var water: int = data["water"][i][j]

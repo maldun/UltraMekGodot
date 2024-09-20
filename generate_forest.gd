@@ -5,6 +5,7 @@ const NR_TREES_LIGHT: int = 3
 const NR_TREES_HEAVY: int = 6
 const PI: float = atan(1)*4
 
+# preload of scenes for tree generation
 const low_poly_autumn_tree = preload("res://assets/hexes/scenes/low_poly_tree_autumn.tscn")
 const dry_tree = preload("res://assets/hexes/scenes/dry_tree.tscn")
 const fir = preload("res://assets/hexes/scenes/fir2.tscn")
