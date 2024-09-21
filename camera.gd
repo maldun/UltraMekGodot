@@ -42,7 +42,7 @@ func _input(event: InputEvent) -> void:
 			elif event.get_keycode() == KEY_E:
 				rotate_y(-rot_speed)
 			elif event.get_keycode() == KEY_ESCAPE:
-				
+				change_menu_visibility.emit()
 		else:
 			pass
 			#print("Event: ",event.as_text())
