@@ -2,11 +2,13 @@ extends Marker3D
 
 const PI: float = atan(1)*4
 
+signal change_menu_visibility
+
 var mouse_sense: float = 0.005
 var speed: float = 1.0
 var rot_speed: float = speed*PI/45
 var ctrl_pressed: bool = false
-
+var menu_hidden: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -39,6 +41,8 @@ func _input(event: InputEvent) -> void:
 				rotate_y(rot_speed)
 			elif event.get_keycode() == KEY_E:
 				rotate_y(-rot_speed)
+			elif event.get_keycode() == KEY_ESCAPE:
+				
 		else:
 			pass
 			#print("Event: ",event.as_text())

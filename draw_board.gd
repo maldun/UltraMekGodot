@@ -81,7 +81,7 @@ func get_tile(asset_data: Dictionary, height: int,rough: int,wood: int,swamp: in
 			if str(water) in tile_data["water"].keys():
 				texture_fname = tile_data["water"][str(water)]
 	
-	print("Road: ",road)
+	#print("Road: ",road)
 	if road[0] > 0:
 		texture_fname = get_road_tile(texture_fname,road)
 		texture_fname = asset_data["roads"] + texture_fname

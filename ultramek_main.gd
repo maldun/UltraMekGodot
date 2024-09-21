@@ -8,6 +8,7 @@ const NODE_NAME: String = "Main"
 const DEFAULT_HOST: String = "127.0.0.1"
 const DEFAULT_PORT: int = 8563
 
+const MAIN_MENU_NODE_NAME: String = "MainMenu"
 const TCP_NODE_NAME: String = "TCPClient"
 const BOARD3D_NODE_NAME: String = "Board3D"
 
@@ -18,6 +19,7 @@ const NEW_GAME_BUTTON: String = "NewGameButton"
 
 var game_client: UltraMekClient = null
 
+var main_menu_node: Node
 var connect_server_button: Node 
 var new_game_button: Node 
 
@@ -36,13 +38,20 @@ func _tcp_server_connect()->String:
 	await game_client.set_host_and_port(host,port)
 	await add_child(game_client)
 	return "Server Start"
-		
+
+func _hide_main_menu()->void:
+	main_menu_node.visible = false
+
+func _show_main_menu()->void:
+	main_menu_node.visible = true
+
 func _new_game_start(fname: String)->void:
 	if not has_node(BOARD3D_NODE_NAME):
 		var board_scene = BOARD3D_SCENE.instantiate()
 		board_scene.name = BOARD3D_NODE_NAME
 		add_child(board_scene)
 	
+	_hide_main_menu()
 	if game_client._connect_tcp == true:
 		print("Alert: Game Start")
 		request_board_signal.emit(fname)
@@ -83,5 +92,6 @@ func _set_mouse():
 	#Input.set_custom_mouse_cursor(arrow)
 	#Input.set_custom_mouse_cursor(beam, Input.CURSOR_IBEAM)
 func _setup_buttons():
+	main_menu_node = find_child(MAIN_MENU_NODE_NAME,true,false)
 	connect_server_button = find_child(CONNECT_SERVER_BUTTON,true,false)
 	new_game_button = find_child(NEW_GAME_BUTTON,true,false)
