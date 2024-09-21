@@ -1,9 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://cx5vf6mi3bg8g"]
+[gd_scene load_steps=5 format=3 uid="uid://cx5vf6mi3bg8g"]
 
-[ext_resource type="Script" path="res://game_client.gd" id="1_1lw06"]
 [ext_resource type="PackedScene" uid="uid://subml1gd2r76" path="res://main_menu.tscn" id="1_ebg04"]
 [ext_resource type="Script" path="res://ultramek_main.gd" id="1_jna46"]
-[ext_resource type="PackedScene" uid="uid://wrr7vj3ftaot" path="res://board3d.tscn" id="1_mllqf"]
 [ext_resource type="PackedScene" uid="uid://bx4ejyq6xfdbq" path="res://camera.tscn" id="2_udx2d"]
 [ext_resource type="PackedScene" uid="uid://b4kgdygb4srs5" path="res://standee_primitive_3d.tscn" id="4_iafrt"]
 
@@ -12,13 +10,7 @@ script = ExtResource("1_jna46")
 
 [node name="MainMenu" parent="." instance=ExtResource("1_ebg04")]
 
-[node name="TCPClient" type="Node" parent="."]
-script = ExtResource("1_1lw06")
-
 [node name="camera_pivot_ Marker3D" parent="." instance=ExtResource("2_udx2d")]
-
-[node name="Board3D" parent="." instance=ExtResource("1_mllqf")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.46865)
 
 [node name="StandeePrimitive3D" parent="." instance=ExtResource("4_iafrt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.58508, 5, -18.9785)

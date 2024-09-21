@@ -18,15 +18,16 @@ func _process_update(delta: float) -> int:
 		_status = new_status
 		match _status:
 			_stream.STATUS_NONE:
-				print("Disconnected from host.")
+				#print("Disconnected from host.")
 				emit_signal("disconnected")
 			_stream.STATUS_CONNECTING:
-				print("Connecting to host.")
+				pass
+				#print("Connecting to host.")
 			_stream.STATUS_CONNECTED:
-				print("Connected to host.")
+				#print("Connected to host.")
 				emit_signal("connected")
 			_stream.STATUS_ERROR:
-				print("Error with socket stream.")
+				#print("Error with socket stream.")
 				emit_signal("error")
 				
 	return new_status
@@ -56,13 +57,15 @@ func _process(delta: float) -> void:
 	#		else:
 	#			emit_signal("data", data[1])
 
-func connect_to_host(host: String, port: int) -> void:
+func connect_to_host(host: String, port: int) -> bool:
 	print("Connecting to %s:%d" % [host, port])
 	# Reset status so we can tell if it changes to error again.
 	_status = _stream.STATUS_NONE
 	if _stream.connect_to_host(host, port) != OK:
-		print("Error connecting to host.")
+		#print("Error connecting to host.")
 		emit_signal("error")
+		return false
+	return true
 		
 func disconnect_from_host() -> void:
 	print("Disconnected from Host")
@@ -70,40 +73,40 @@ func disconnect_from_host() -> void:
 	
 func send(data: PackedByteArray,timeout: float = _timeout) -> bool:
 	_status = _stream.get_status()
-	print("Status before poll: ",_status, _stream.STATUS_CONNECTED)
+	#print("Status before poll: ",_status, _stream.STATUS_CONNECTED)
 	var counter: int = 0
 	while _status != _stream.STATUS_CONNECTED:
-		print("Error: Stream is not currently connected. Polling again. Status: ",_status)
+		#print("Error: Stream is not currently connected. Polling again. Status: ",_status)
 		await get_tree().create_timer(timeout).timeout
 		#return false
 		_status = _stream.poll()
 		counter += 1
 		if counter > 10000:
 			return false
-	print("Status after poll: ",_status)
+	#print("Status after poll: ",_status)
 	var error: int = _stream.put_data(data)
 	if error != OK:
-		print("Error writing to stream: ", error)
+		#print("Error writing to stream: ", error)
 		return false
 	return true
 
 func recieve(timeout: float = _timeout) -> String:
 	_status = _stream.get_status()
-	print("Status before poll: ",_status, _stream.STATUS_CONNECTED)
+	#print("Status before poll: ",_status, _stream.STATUS_CONNECTED)
 	var counter: int = 0
 	while _status != _stream.STATUS_CONNECTED:
-		print("Error: Stream is not currently connected. Polling again. Status: ",_status)
+		#print("Error: Stream is not currently connected. Polling again. Status: ",_status)
 		await get_tree().create_timer(timeout).timeout
 		_status = _stream.poll()
 		counter += 1
 		if counter > 10000:
 			return "__ERROR__"
-	print("Status after poll: ",_status)
+	#print("Status after poll: ",_status)
 	var available_bytes: int = _stream.get_available_bytes()
 	if available_bytes > 0:
 		var out: Array = _stream.get_partial_data(available_bytes)
 		var output: String = out[1].get_string_from_utf8()
-		print("Available Bytes: ", available_bytes, " Out: ",output)
+		#print("Available Bytes: ", available_bytes, " Out: ",output)
 		return output
 		if len(output) == 0:
 			print("Error writing to stream: ", error)

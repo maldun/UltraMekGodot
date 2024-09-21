@@ -68,19 +68,19 @@ func get_tile(asset_data: Dictionary, height: int,rough: int,wood: int,swamp: in
 			#return "snow_l_woods_" + str(rng.randi_range(0,2)) + PNG
 		#elif wood == 2:
 			#return "snow_h_woods_" + str(rng.randi_range(0,2)) + PNG
+	var texture_fname = tile_data["default"][str(height)]
 	
 	if rough > 0:
 		print("Rough: ", rough)
 		if "rough" in tile_data.keys():
 			if str(rough) in tile_data["rough"].keys():
-				return tile_data["rough"][str(rough)]
+				texture_fname = tile_data["rough"][str(rough)]
 	
 	if water > 0:
 		if "water" in tile_data.keys():
 			if str(water) in tile_data["water"].keys():
-				return tile_data["water"][str(water)]
+				texture_fname = tile_data["water"][str(water)]
 	
-	var texture_fname = tile_data["default"][str(height)]
 	print("Road: ",road)
 	if road[0] > 0:
 		texture_fname = get_road_tile(texture_fname,road)
@@ -124,14 +124,7 @@ func create_board(data: Dictionary) -> void:
 	var centers = s.create_grid_centers(size_x,size_y)
 	print("Centers: ",len(centers))
 	print("Dimx: ",size_x,"Dimy: ",size_y)
-	
-	# temp code 
-	#var texture = preload(top_mat)
-	#var rgb = Vector3(0,1,0)
-	#var material = StandardMaterial3D.new()
-	#material.albedo_color = Color(rgb[0], rgb[1], rgb[2])
-	#var material2 = StandardMaterial3D.new()
-	#material2.albedo_texture = texture
+
 	
 	var num_zeros_x: int = int(floor(log(size_x)/log(10)))+1
 	var num_zeros_y: int  = int(floor(log(size_y)/log(10)))+1 
@@ -179,24 +172,19 @@ func create_board(data: Dictionary) -> void:
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	print("Board 3D")
 	#create_board_from_file("res://test_json.json")
 	pass
 	
-	#add_child(hex)
-	#hex.create_hex(Vector2(2,2),"res://assets/hexes/hexa_h9.json",material,material2,0)
 	
-	#hex = Hex.new()
-	#hex.set_name("Hex2")
-	#hex.mesh = ArrayMesh.new()
-	#hex.create_hex(Vector2(3,3),"res://assets/hexes/hexa_h9.json",material,material2,0)
-	#add_child(hex)
 func _recieved_board(recieved_map) -> void:
-	#print("Recieved Map: ", recieved_map)
+	print("Recieved Map: ", recieved_map)
 	create_board(recieved_map)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	var mm = get_tree().get_root().get_node("Main")
-	var client_node = mm.get_node("TCPClient")
-	await client_node.connect("recieved_board",_recieved_board)
+	var mm = get_tree().get_root().get_node(UltraMekMain.NODE_NAME)
+	var client_node = mm.get_node(mm.TCP_NODE_NAME)
+	if client_node != null:
+		await client_node.connect("recieved_board",_recieved_board)
 	
