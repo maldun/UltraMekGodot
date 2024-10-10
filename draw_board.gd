@@ -122,8 +122,14 @@ func create_board(data: Dictionary) -> void:
 	var size_x = int(data["size_x"])
 	var size_y = int(data["size_y"])
 	var centers = s.create_grid_centers(size_x,size_y)
-	print("Centers: ",len(centers))
-	print("Dimx: ",size_x,"Dimy: ",size_y)
+	#print("Centers: ",len(centers))
+	#print("Dimx: ",size_x,"Dimy: ",size_y)
+	#print("Test Vector: ",s.compute_euclidean(3.0,4.0)==5.0)
+	#var dim_x: int = 3
+	#var dim_y: int = 3
+	#var warrr: Array = [0,1,2,10,1,1,2,1,1]
+	#print("Test Board Graph Creation: ",s.create_board_graph(dim_x,dim_y,warrr))
+	#print("Test Board Graph Path: ",s.compute_shortest_walk_ids(0,8))
 
 	
 	var num_zeros_x: int = int(floor(log(size_x)/log(10)))+1

@@ -21,7 +21,11 @@ var game_client: UltraMekClient = null
 
 var main_menu_node: Node
 var connect_server_button: Node 
-var new_game_button: Node 
+var new_game_button: Node
+var board_node: Node
+
+# flags
+var main_menu_visible: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -41,15 +45,21 @@ func _tcp_server_connect()->String:
 
 func _hide_main_menu()->void:
 	main_menu_node.visible = false
+	main_menu_visible = false
 
 func _show_main_menu()->void:
 	main_menu_node.visible = true
+	main_menu_visible = true
 
 func _new_game_start(fname: String)->void:
-	if not has_node(BOARD3D_NODE_NAME):
-		var board_scene = BOARD3D_SCENE.instantiate()
-		board_scene.name = BOARD3D_NODE_NAME
-		add_child(board_scene)
+	if has_node(BOARD3D_NODE_NAME):
+		var board_node_temp = get_node(BOARD3D_NODE_NAME)
+		remove_child(board_node_temp)
+	
+	var board_scene = BOARD3D_SCENE.instantiate()
+	board_scene.name = BOARD3D_NODE_NAME
+	add_child(board_scene)
+	board_node = board_scene
 	
 	_hide_main_menu()
 	if game_client._connect_tcp == true:
@@ -95,3 +105,12 @@ func _setup_buttons():
 	main_menu_node = find_child(MAIN_MENU_NODE_NAME,true,false)
 	connect_server_button = find_child(CONNECT_SERVER_BUTTON,true,false)
 	new_game_button = find_child(NEW_GAME_BUTTON,true,false)
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		if event.is_pressed() and event.get_keycode() == KEY_ESCAPE:
+			if main_menu_visible == true:
+				await _hide_main_menu()
+			else:
+				await _show_main_menu()
+			
