@@ -1,9 +1,9 @@
 class_name Board
 extends Node3D
 
-const unit_length = 1.0
-const unit_height = 0.5
-const PNG = ".png"
+const unit_length: float = 1.0
+const unit_height: float = 0.5
+const PNG: String = ".png"
 
 const top_mat = "res://grass_h_swamp_0.png"
 const color_norm = 255
@@ -21,8 +21,6 @@ const texture_folders = {"snow":"res://assets/hexes/snow/",
 
 var flat: bool = false
 var flat_level: int = -2
-
-
 	
 func create_material_map() -> Dictionary:
 	var materials = {}
@@ -122,7 +120,7 @@ func create_board(data: Dictionary) -> void:
 	var size_x = int(data["size_x"])
 	var size_y = int(data["size_y"])
 	var centers = s.create_grid_centers(size_x,size_y)
-	#print("Centers: ",len(centers))
+	#print("Centers: ",centers)
 	#print("Dimx: ",size_x,"Dimy: ",size_y)
 	#print("Test Vector: ",s.compute_euclidean(3.0,4.0)==5.0)
 	#var dim_x: int = 3
@@ -130,7 +128,9 @@ func create_board(data: Dictionary) -> void:
 	#var warrr: Array = [0,1,2,10,1,1,2,1,1]
 	#print("Test Board Graph Creation: ",s.create_board_graph(dim_x,dim_y,warrr))
 	#print("Test Board Graph Path: ",s.compute_shortest_walk_ids(0,8))
-
+	# send data to main
+	Global.processed_board_data.emit(size_x,size_y)
+	print("Alert: board_data_sent")
 	
 	var num_zeros_x: int = int(floor(log(size_x)/log(10)))+1
 	var num_zeros_y: int  = int(floor(log(size_y)/log(10)))+1 
@@ -138,8 +138,6 @@ func create_board(data: Dictionary) -> void:
 	var format_x: String = "%0" + str(num_zeros_x) + "d"
 	var format_y: String = "%0" + str(num_zeros_y) + "d"
 	#print("form string: ", format_x)
-	
-	
 	for i in range(size_x):
 		for j in range(size_y):
 			var x = centers[i][j][0]
@@ -172,14 +170,13 @@ func create_board(data: Dictionary) -> void:
 			hex.generate_decoration(data,i,j)
 			hex.create_convex_collision()
 			add_child(hex)
-			
+	
+	
 	
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	print("Board 3D")
-	#create_board_from_file("res://test_json.json")
 	pass
 	
 	
@@ -190,6 +187,7 @@ func _recieved_board(recieved_map) -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	var mm = get_tree().get_root().get_node(UltraMekMain.NODE_NAME)
+	#print("Main Variables: ",mm.ultra_mek_cpp.get_unit_length())
 	var client_node = mm.get_node(mm.TCP_NODE_NAME)
 	if client_node != null:
 		await client_node.connect("recieved_board",_recieved_board)

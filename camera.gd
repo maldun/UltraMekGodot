@@ -14,6 +14,7 @@ var ctrl_pressed: bool = false
 var menu_hidden: bool = false
 var camera_node: Node
 var walk_light_node: Node
+var ultra_mek: UltraMekGD = UltraMekGD.new()
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -30,6 +31,7 @@ func project_cursor(event: InputEvent) -> Vector3:
 	 
 func walk_cursor(event) -> void:
 	var to = project_cursor(event)
+	print("Project to ",to)
 	walk_light_node.set_global_position(to)
 
 func keyboard_events(event: InputEventKey) -> void:
