@@ -112,14 +112,15 @@ func create_board_from_file(fname: String)-> void:
 
 func create_board(data: Dictionary) -> void:
 	# set cpp helpers
-	var s = UltraMekGD.new()
-	s.set_unit_length(unit_length)
+	var s: UltraMekGD = Global.ultra_mek_cpp
+	
 	var heights = data["heights"]
 	var ttypes = data["tile_type"]
 	var mat_map = create_material_map()
 	var size_x = int(data["size_x"])
 	var size_y = int(data["size_y"])
-	var centers = s.create_grid_centers(size_x,size_y)
+	var centers = s.setup_board_geometry(size_x,size_y,unit_length,unit_height)
+	# = s.get_grid_centers()#(size_x,size_y)
 	#print("Centers: ",centers)
 	#print("Dimx: ",size_x,"Dimy: ",size_y)
 	#print("Test Vector: ",s.compute_euclidean(3.0,4.0)==5.0)
@@ -182,6 +183,8 @@ func _ready() -> void:
 	
 func _recieved_board(recieved_map) -> void:
 	print("Recieved Map: ", recieved_map)
+	Global.board_data = recieved_map
+	
 	create_board(recieved_map)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

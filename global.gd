@@ -3,6 +3,8 @@ extends Node
 signal processed_board_data(dim_x: int, dim_y: int)
 
 var game_state: Dictionary = {}
+var board_data: Dictionary = {}
+var ultra_mek_cpp: UltraMekGD = UltraMekGD.new()
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

@@ -18,7 +18,7 @@ const CONNECT_SERVER_BUTTON: String = "ConnectButton"
 const NEW_GAME_BUTTON: String = "NewGameButton"
 
 var game_client: UltraMekClient = null
-var ultra_mek_cpp: UltraMekGD = UltraMekGD.new()
+
 
 var main_menu_node: Node
 var connect_server_button: Node 
@@ -84,7 +84,7 @@ func _game_start_process(delta: float)->void:
 
 func _collect_board_data(dim_x:int,dim_y:int)->void:
 	print("Alert: Board data recieved!")
-	Global.game_state["board_state"] = {"dim_x":dim_x,"dim_y":dim_y}
+	Global.game_state["board_state"] = {"dim_x":dim_x,"dim_y":dim_y,"active":true}
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -95,8 +95,6 @@ func _process(delta: float) -> void:
 	print("Alert: Game State: ",Global.game_state)
 	
 func _setup_game():
-	ultra_mek_cpp.set_unit_length(Board.unit_length)
-	ultra_mek_cpp.set_unit_height(Board.unit_height)
 	_setup_buttons()
 	_set_mouse()
 

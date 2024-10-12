@@ -31,8 +31,16 @@ func project_cursor(event: InputEvent) -> Vector3:
 	 
 func walk_cursor(event) -> void:
 	var to = project_cursor(event)
-	print("Project to ",to)
-	walk_light_node.set_global_position(to)
+	print("Pos to ",to)
+	var grid_centers: Array = Global.ultra_mek_cpp.get_grid_centers()
+	if len(grid_centers)>0:
+		var to2: Vector2 = Vector2(to[0],to[2])
+		var hex: Vector2i = Global.ultra_mek_cpp.compute_board_hex_for_point(to2)
+		var hex_center: Vector2 = grid_centers[hex[0]][hex[1]]
+		var hex_height: float = (Global.board_data["heights"][hex[0]][hex[1]]+6)*Board.unit_height
+		var pos = Vector3(hex_center[0],hex_height+2,hex_center[1])
+		walk_light_node.set_global_position(pos)
+		print("Pos pos ",pos)
 
 func keyboard_events(event: InputEventKey) -> void:
 	if event.get_keycode() == KEY_CTRL:

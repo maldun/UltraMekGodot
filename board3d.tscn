@@ -10,7 +10,6 @@ bounce = 0.29
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.99236, 17.2814, -8.03047)
-visible = false
 light_energy = 16.0
 light_indirect_energy = 16.0
 omni_range = 4096.0
