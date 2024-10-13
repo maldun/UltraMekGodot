@@ -3,7 +3,8 @@ extends Marker3D
 const PI: float = atan(1)*4
 const CAMERA_NAME: String = "Camera3D"
 const WALK_LIGHT_NODE_NAME: String = "WalkLight"
-const RAY_LENGTH: float = 10
+const RAY_LENGTH: float = 17
+const DY: float = 2*Board.unit_height
 
 signal change_menu_visibility
 
@@ -26,7 +27,14 @@ func project_cursor(event: InputEvent) -> Vector3:
 	var camera = camera_node
 	var mouse_pos: Vector2 = event.global_position
 	var from = camera.project_ray_origin(mouse_pos)
-	var to = from + camera.project_ray_normal(mouse_pos) * RAY_LENGTH
+	var direction = camera.project_ray_normal(mouse_pos)
+	#var from = camera.get_global_position()
+	#var direction = camera.project_ray_origin(mouse_pos)
+	var corr: float = 1*Board.unit_height
+	var ray_length: float = (corr-from[1])/direction[1] if direction[1] != 0 else RAY_LENGTH
+	ray_length = min(ray_length,RAY_LENGTH)
+	
+	var to = from + direction * ray_length
 	return to
 	 
 func walk_cursor(event) -> void:
@@ -35,10 +43,20 @@ func walk_cursor(event) -> void:
 	var grid_centers: Array = Global.ultra_mek_cpp.get_grid_centers()
 	if len(grid_centers)>0:
 		var to2: Vector2 = Vector2(to[0],to[2])
-		var hex: Vector2i = Global.ultra_mek_cpp.compute_board_hex_for_point(to2)
-		var hex_center: Vector2 = grid_centers[hex[0]][hex[1]]
+		var hex: Vector2i = await Global.ultra_mek_cpp.compute_board_hex_for_point(to2)
+		var pos: Vector3
 		var hex_height: float = (Global.board_data["heights"][hex[0]][hex[1]]+6)*Board.unit_height
-		var pos = Vector3(hex_center[0],hex_height+2,hex_center[1])
+		if hex[0]!=-1 and hex[1]!=-1:
+			var hex_center: Vector2 = grid_centers[hex[0]][hex[1]]
+			pos = Vector3(hex_center[0],hex_height+DY,hex_center[1])
+		elif hex[0]!=-1 and hex[1]==-1:
+			var hex_center: Vector2 = grid_centers[hex[0]][0]
+			pos = Vector3(hex_center[0],hex_height+DY,hex_center[1])
+		elif hex[0]==-1 and hex[1]!=-1:
+			var hex_center: Vector2 = grid_centers[0][hex[1]]
+			pos = Vector3(hex_center[0],hex_height+DY,hex_center[1])
+		else:
+			pos = to
 		walk_light_node.set_global_position(pos)
 		print("Pos pos ",pos)
 
@@ -58,6 +76,13 @@ func keyboard_events(event: InputEventKey) -> void:
 		rotate_y(rot_speed)
 	elif event.get_keycode() == KEY_E:
 		rotate_y(-rot_speed)
+	elif event.get_keycode() == KEY_R:
+		var rot: Vector3 = get_rotation()
+		var valx: float = -PI/2-rot[0]
+		var valy: float = 0-rot[1]
+		print("Rotation: ",rot," ",rot[0]+valx," ", rot[1]+valy)
+		rotate_x(-3*PI/2+valx)
+		rotate_y(valy)
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventWithModifiers:

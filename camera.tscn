@@ -7,11 +7,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.93856, 0, 3.95731)
 script = ExtResource("1_v6ot6")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.688747, 0.725002, 0, -0.725002, 0.688747, -4.83069, 11.2309, -7.21922)
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -4.83069, 11.2309, -7.21922)
 
 [node name="WalkLight" type="SpotLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
-light_color = Color(0.113725, 0.152941, 1, 1)
+light_color = Color(0.177642, 0.268392, 0.568099, 1)
 light_energy = 16.0
-spot_range = 20.213
-spot_angle_attenuation = 0.870551
+light_size = 0.656
+light_specular = 10.0
+spot_range = 10.0
+spot_attenuation = 2.0
+spot_angle = 90.0
+spot_angle_attenuation = 1.56917
