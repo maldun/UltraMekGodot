@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://wrr7vj3ftaot"]
 
-[ext_resource type="Script" path="res://draw_board.gd" id="1_11avm"]
+[ext_resource type="Script" path="res://gdsrc/board/draw_board.gd" id="1_atixd"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_gad1t"]
 rough = true
@@ -25,4 +25,4 @@ axis_lock_angular_z = true
 physics_material_override = SubResource("PhysicsMaterial_gad1t")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
-script = ExtResource("1_11avm")
+script = ExtResource("1_atixd")

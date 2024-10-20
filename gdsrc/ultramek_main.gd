@@ -3,6 +3,7 @@ extends Node
 
 signal connect_tcp_server_main
 signal request_board_signal(fname: String)
+signal request_deployment_signal(fname: String)
 
 const NODE_NAME: String = "Main"
 const DEFAULT_HOST: String = "127.0.0.1"
@@ -11,22 +12,26 @@ const DEFAULT_PORT: int = 8563
 const MAIN_MENU_NODE_NAME: String = "MainMenu"
 const TCP_NODE_NAME: String = "TCPClient"
 const BOARD3D_NODE_NAME: String = "Board3D"
+const HUD_NODE_NAME: String = "HUD"
 
-const BOARD3D_SCENE = preload("res://board3d.tscn")
+const BOARD3D_SCENE = preload("res://gdsrc/board/board3d.tscn")
 
 const CONNECT_SERVER_BUTTON: String = "ConnectButton"
 const NEW_GAME_BUTTON: String = "NewGameButton"
 
 var game_client: UltraMekClient = null
 
-
+# main menu buttons
 var main_menu_node: Node
 var connect_server_button: Node 
 var new_game_button: Node
+
 var board_node: Node
+var hud_node: Node
 
 # flags
 var main_menu_visible: bool = false
+var current_game_phase: String
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -42,6 +47,7 @@ func _tcp_server_connect()->String:
 	var port = DEFAULT_PORT
 	await game_client.set_host_and_port(host,port)
 	await add_child(game_client)
+	Global.game_client = game_client
 	return "Server Start"
 
 func _hide_main_menu()->void:
@@ -69,8 +75,6 @@ func _new_game_start(fname: String)->void:
 		#var fname: String = "test/samples/snow.board"
 		#var answer: String = await game_client.request_board(fname)
 		
-		
-		
 func _server_process(delta: float) -> void:
 	var status = await connect_server_button.connect("connect_tcp_server",_tcp_server_connect)
 
@@ -85,6 +89,11 @@ func _game_start_process(delta: float)->void:
 func _collect_board_data(dim_x:int,dim_y:int)->void:
 	print("Alert: Board data recieved!")
 	Global.game_state["board_state"] = {"dim_x":dim_x,"dim_y":dim_y,"active":true}
+	Global.game_phase = Global.DEPLOYMENT_PHASE
+	
+	
+func _start_deployment()-> void:
+	pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -93,10 +102,17 @@ func _process(delta: float) -> void:
 		_game_start_process(delta)
 	await Global.connect("processed_board_data",_collect_board_data)
 	print("Alert: Game State: ",Global.game_state)
+	print("Alert: Game Phase: ",Global.game_phase)
 	
 func _setup_game():
 	_setup_buttons()
+	_setup_hud()
 	_set_mouse()
+	_set_states()
+
+func _set_states() -> void:
+	Global.game_phase = Global.PREPARATION_PHASE
+	current_game_phase = Global.game_phase
 
 func _set_mouse():
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)
@@ -108,6 +124,10 @@ func _set_mouse():
 	#var beam = load("res://beam.png")
 	#Input.set_custom_mouse_cursor(arrow)
 	#Input.set_custom_mouse_cursor(beam, Input.CURSOR_IBEAM)
+func _setup_hud() -> void:
+	hud_node = find_child(HUD_NODE_NAME,true,false)
+	hud_node.visible = false
+	
 func _setup_buttons():
 	main_menu_node = find_child(MAIN_MENU_NODE_NAME,true,false)
 	connect_server_button = find_child(CONNECT_SERVER_BUTTON,true,false)

@@ -9,14 +9,17 @@ const NONE_ANSWER: String = "Nothing!"
 
 const RQ: String = "REQUEST_TYPE"
 const MAP_RQ: String = "BOARD_REQUEST"
+const DEP_RQ: String = "DEPLOYMENT_REQUEST"
 const FILENAME: String = 'filename'
 
 signal recieved_board(board_json)
+signal recieved_deployment_data(deployment_json)
 
 #const Client = preload("res://tcp_client.gd")
 #var _client: Client = Client.new()
 var _client: UltraMekTCPClient # = UltraMekTCPClient.new()
 var board_requested: bool
+var deployment_requested: bool
 var board_fname: String = ""
 var _connect_tcp: bool = false
 var main_node: Node = null
@@ -35,6 +38,7 @@ func _ready() -> void:
 	#_client.connect("data", _print_server_data)
 	add_child(_client)
 	board_requested = false
+	deployment_requested = false
 	_connect_tcp = false
 	main_node = get_parent()
 
@@ -65,14 +69,27 @@ func request_board(fname: String) -> void:
 			board_requested = false
 	
 	#return answer
+	
 func start_requesting_board(fname: String):
 	board_requested = true
 	board_fname = fname
+
+func request_deployment():
+	var answer: String = NONE_ANSWER
+	if deployment_requested == true:
+		
+		deployment_requested = false
+
+func start_requesting_deployment():
+	deployment_requested = true
 
 func _process_routine(delta: float) -> void:
 	#var fname: String = "test/samples/snow.board"
 	if main_node != null:
 		await main_node.connect("request_board_signal",start_requesting_board)
+		await request_board(board_fname)
+		
+		await main_node.connect("request_deployment_signal",start_requesting_deployment)
 		await request_board(board_fname)
 		
 	

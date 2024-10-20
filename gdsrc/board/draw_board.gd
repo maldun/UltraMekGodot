@@ -184,14 +184,15 @@ func _ready() -> void:
 func _recieved_board(recieved_map) -> void:
 	print("Recieved Map: ", recieved_map)
 	Global.board_data = recieved_map
-	
 	create_board(recieved_map)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	var mm = get_tree().get_root().get_node(UltraMekMain.NODE_NAME)
+	#var mm = get_tree().get_root().get_node(UltraMekMain.NODE_NAME)
 	#print("Main Variables: ",mm.ultra_mek_cpp.get_unit_length())
-	var client_node = mm.get_node(mm.TCP_NODE_NAME)
+	#var client_node = mm.get_node(mm.TCP_NODE_NAME)
+	
+	var client_node = Global.game_client
 	if client_node != null:
 		await client_node.connect("recieved_board",_recieved_board)
 	

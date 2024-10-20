@@ -2,11 +2,11 @@
 
 [ext_resource type="Texture2D" uid="uid://to2tqdgnaij1" path="res://assets/menu/UltraMek_textlogo.png" id="1_bvmuw"]
 [ext_resource type="Texture2D" uid="uid://hee3a4xiy6eu" path="res://assets/menu/connect_server.png" id="2_ui0h1"]
-[ext_resource type="Script" path="res://connect_button.gd" id="3_2m350"]
 [ext_resource type="Texture2D" uid="uid://btc7r41kshrui" path="res://assets/menu/quit.png" id="3_7jbf4"]
+[ext_resource type="Script" path="res://gdsrc/menu/connect_button.gd" id="3_bj8xs"]
 [ext_resource type="Texture2D" uid="uid://6k3ckoyujx8r" path="res://assets/menu/new_game.png" id="4_khoq8"]
-[ext_resource type="Script" path="res://quit_button.gd" id="4_kxjpd"]
-[ext_resource type="Script" path="res://new_game_button.gd" id="5_3iw16"]
+[ext_resource type="Script" path="res://gdsrc/menu/quit_button.gd" id="4_kxjpd"]
+[ext_resource type="Script" path="res://gdsrc/menu/new_game_button.gd" id="5_3iw16"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_4a4tu"]
 
@@ -52,7 +52,7 @@ theme_override_constants/separation = 10
 [node name="ConnectButton" type="Button" parent="MarginMenu/VSplitContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2
 icon = ExtResource("2_ui0h1")
-script = ExtResource("3_2m350")
+script = ExtResource("3_bj8xs")
 
 [node name="NewGameButton" type="Button" parent="MarginMenu/VSplitContainer/HBoxContainer/VBoxContainer"]
 layout_mode = 2

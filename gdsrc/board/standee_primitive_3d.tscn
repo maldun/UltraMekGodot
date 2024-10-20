@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://b4kgdygb4srs5"]
 
 [ext_resource type="Script" path="res://init_standee.gd" id="1_8jtql"]
-[ext_resource type="Script" path="res://draw_standee.gd" id="1_gohut"]
+[ext_resource type="Script" path="res://gdsrc/board/draw_standee.gd" id="1_gohut"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_2akgy"]
 
