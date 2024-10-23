@@ -18,9 +18,10 @@ signal recieved_deployment_data(deployment_json)
 #const Client = preload("res://tcp_client.gd")
 #var _client: Client = Client.new()
 var _client: UltraMekTCPClient # = UltraMekTCPClient.new()
-var board_requested: bool
-var deployment_requested: bool
+var board_requested: bool = false
+var deployment_requested: bool = false
 var board_fname: String = ""
+var forces: Dictionary = {}
 var _connect_tcp: bool = false
 var main_node: Node = null
 
@@ -53,8 +54,8 @@ func _process(delta: float) -> void:
 
 func request_board(fname: String) -> void:
 	var answer: String = NONE_ANSWER
-	#print("Sent: ", board_requested)
-	if board_requested == true:
+	print("Sent board 2: ", board_requested, board_fname)
+	if board_requested == true and fname != '':
 		var request: String = await _request_map_file(fname)
 		var message: PackedByteArray = await request.to_utf8_buffer() 
 		#print("Client data 1 : ", message.get_string_from_utf8())
@@ -67,30 +68,47 @@ func request_board(fname: String) -> void:
 			print("Answer: ", recieved_map)
 			recieved_board.emit(recieved_map)
 			board_requested = false
+			board_fname = ''
 	
 	#return answer
 	
 func start_requesting_board(fname: String):
 	board_requested = true
 	board_fname = fname
+	#print("Sent board 1: ", board_requested, board_fname)
 
-func request_deployment():
+func request_deployment(forces: Dictionary):
 	var answer: String = NONE_ANSWER
+	print("Sent: ", forces)
 	if deployment_requested == true:
-		
-		deployment_requested = false
+		var request: String = await _request_dict(forces,DEP_RQ)
+		var message: PackedByteArray = await request.to_utf8_buffer() 
+		await _client.connect_to_host(HOST, PORT)
+		await _handle_client_data(message)
+		answer = await _client.recieve()
+		var answer_dict = JSON.parse_string(answer)
+		if answer_dict != null:
+			var recieved_force = answer_dict[DEP_RQ] 
+			print("Answer: ", recieved_force)
+			recieved_deployment_data.emit(recieved_force)
+			deployment_requested = false
 
-func start_requesting_deployment():
+func start_requesting_deployment(forces_rec: Dictionary):
 	deployment_requested = true
+	forces = forces_rec
+	print("Alert: Forces: ",forces)
 
 func _process_routine(delta: float) -> void:
 	#var fname: String = "test/samples/snow.board"
 	if main_node != null:
 		await main_node.connect("request_board_signal",start_requesting_board)
-		await request_board(board_fname)
+		if main_node.board_recieved == false:
+			await request_board(board_fname)
+		
 		
 		await main_node.connect("request_deployment_signal",start_requesting_deployment)
-		await request_board(board_fname)
+		if main_node.forces_recieved == false:
+			await request_deployment(forces)
 		
 	
 func _handle_client_data(data: PackedByteArray) -> bool:
@@ -104,6 +122,13 @@ func _request_map_file(filename: String) -> String:
 		rdict[MAP_RQ] = {"filename":filename}
 		var output: String = JSON.stringify(rdict) + '\n'
 		return output
+		
+func _request_dict(req: Dictionary,request_type: String)-> String:
+	var rdict: Dictionary = {}
+	rdict[request_type] = forces
+	var output: String = JSON.stringify(rdict) + '\n'
+	return output
+	
 
 func _init_cpp_bindings() -> void:
 	var s = UltraMekGD.new()

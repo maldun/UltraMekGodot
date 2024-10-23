@@ -3,7 +3,7 @@ extends Node
 
 signal connect_tcp_server_main
 signal request_board_signal(fname: String)
-signal request_deployment_signal(fname: String)
+signal request_deployment_signal(forces: Dictionary)
 
 const NODE_NAME: String = "Main"
 const DEFAULT_HOST: String = "127.0.0.1"
@@ -32,10 +32,13 @@ var hud_node: Node
 # flags
 var main_menu_visible: bool = false
 var current_game_phase: String
+var board_recieved: bool = false 
+var forces_recieved: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#_tcp_server_connect()
+	Global.main = self
 	_setup_game()
 
 func _tcp_server_connect()->String:
@@ -58,7 +61,10 @@ func _show_main_menu()->void:
 	main_menu_node.visible = true
 	main_menu_visible = true
 
-func _new_game_start(fname: String)->void:
+func _new_game_start(fname: String,forces: Dictionary,settings: Dictionary)->void:
+	_set_states()
+	_set_new_game_info(fname,forces,settings)
+	
 	if has_node(BOARD3D_NODE_NAME):
 		var board_node_temp = get_node(BOARD3D_NODE_NAME)
 		remove_child(board_node_temp)
@@ -72,8 +78,8 @@ func _new_game_start(fname: String)->void:
 	if game_client._connect_tcp == true:
 		print("Alert: Game Start")
 		request_board_signal.emit(fname)
-		#var fname: String = "test/samples/snow.board"
-		#var answer: String = await game_client.request_board(fname)
+		request_deployment_signal.emit(forces)
+		
 		
 func _server_process(delta: float) -> void:
 	var status = await connect_server_button.connect("connect_tcp_server",_tcp_server_connect)
@@ -88,10 +94,15 @@ func _game_start_process(delta: float)->void:
 
 func _collect_board_data(dim_x:int,dim_y:int)->void:
 	print("Alert: Board data recieved!")
+	board_recieved = true
 	Global.game_state["board_state"] = {"dim_x":dim_x,"dim_y":dim_y,"active":true}
 	Global.game_phase = Global.DEPLOYMENT_PHASE
 	
-	
+func _set_new_game_info(board: String,forces: Dictionary, settings: Dictionary):
+	Global.game_metadata[Global._BOARD_KEY] = board
+	Global.game_metadata[Global._FORCES_KEY] = forces
+	Global.game_metadata[Global._SETTINGS_KEY] = settings
+
 func _start_deployment()-> void:
 	pass
 
@@ -113,6 +124,8 @@ func _setup_game():
 func _set_states() -> void:
 	Global.game_phase = Global.PREPARATION_PHASE
 	current_game_phase = Global.game_phase
+	board_recieved = false
+	forces_recieved = false
 
 func _set_mouse():
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)

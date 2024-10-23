@@ -1,5 +1,13 @@
 extends Node
 
+# Keys
+const _SETTINGS_KEY: String = "settings"
+const _FORCES_KEY: String = "forces"
+const _BOARD_KEY: String = "board"
+
+var game_metadata: Dictionary = {}
+
+# Phases
 const PREPARATION_PHASE: String = "__PREPARATION__PHASE__"
 const DEPLOYMENT_PHASE: String = "__DEPLOYMENT__PHASE__"
 const MOVEMENT_PHASE: String = "__MOVEMENT__PAHSE__"
@@ -13,6 +21,7 @@ var game_state: Dictionary = {}
 var board_data: Dictionary = {}
 var ultra_mek_cpp: UltraMekGD = UltraMekGD.new()
 
+var main: Node = null
 var game_client: Node = null
 
 # Called when the node enters the scene tree for the first time.
