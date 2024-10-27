@@ -9,7 +9,7 @@ const NONE_ANSWER: String = "Nothing!"
 
 const RQ: String = "REQUEST_TYPE"
 const MAP_RQ: String = "BOARD_REQUEST"
-const DEP_RQ: String = "DEPLOYMENT_REQUEST"
+const PLA_RQ: String = "PLAYER_REQUEST"
 const FILENAME: String = 'filename'
 
 signal recieved_board(board_json)
@@ -21,7 +21,7 @@ var _client: UltraMekTCPClient # = UltraMekTCPClient.new()
 var board_requested: bool = false
 var deployment_requested: bool = false
 var board_fname: String = ""
-var forces: Dictionary = {}
+var players: Dictionary = {}
 var _connect_tcp: bool = false
 var main_node: Node = null
 
@@ -54,7 +54,6 @@ func _process(delta: float) -> void:
 
 func request_board(fname: String) -> void:
 	var answer: String = NONE_ANSWER
-	print("Sent board 2: ", board_requested, board_fname)
 	if board_requested == true and fname != '':
 		var request: String = await _request_map_file(fname)
 		var message: PackedByteArray = await request.to_utf8_buffer() 
@@ -77,26 +76,26 @@ func start_requesting_board(fname: String):
 	board_fname = fname
 	#print("Sent board 1: ", board_requested, board_fname)
 
-func request_deployment(forces: Dictionary):
+func request_players(players: Dictionary):
 	var answer: String = NONE_ANSWER
-	print("Sent: ", forces)
+	print("Sent: ", players)
 	if deployment_requested == true:
-		var request: String = await _request_dict(forces,DEP_RQ)
+		var request: String = await _request_dict(players,PLA_RQ)
 		var message: PackedByteArray = await request.to_utf8_buffer() 
 		await _client.connect_to_host(HOST, PORT)
 		await _handle_client_data(message)
 		answer = await _client.recieve()
 		var answer_dict = JSON.parse_string(answer)
 		if answer_dict != null:
-			var recieved_force = answer_dict[DEP_RQ] 
-			print("Answer: ", recieved_force)
-			recieved_deployment_data.emit(recieved_force)
+			var recieved_players = answer_dict[PLA_RQ] 
+			print("Answer: ", recieved_players)
+			recieved_deployment_data.emit(recieved_players)
 			deployment_requested = false
 
-func start_requesting_deployment(forces_rec: Dictionary):
+func start_requesting_players(players_rec: Dictionary):
 	deployment_requested = true
-	forces = forces_rec
-	print("Alert: Forces: ",forces)
+	players = players_rec
+	print("Alert: Forces: ",players)
 
 func _process_routine(delta: float) -> void:
 	#var fname: String = "test/samples/snow.board"
@@ -105,10 +104,9 @@ func _process_routine(delta: float) -> void:
 		if main_node.board_recieved == false:
 			await request_board(board_fname)
 		
-		
-		await main_node.connect("request_deployment_signal",start_requesting_deployment)
+		await main_node.connect("request_players_signal",start_requesting_players)
 		if main_node.forces_recieved == false:
-			await request_deployment(forces)
+			await request_players(players)
 		
 	
 func _handle_client_data(data: PackedByteArray) -> bool:
@@ -125,7 +123,7 @@ func _request_map_file(filename: String) -> String:
 		
 func _request_dict(req: Dictionary,request_type: String)-> String:
 	var rdict: Dictionary = {}
-	rdict[request_type] = forces
+	rdict[request_type] = players
 	var output: String = JSON.stringify(rdict) + '\n'
 	return output
 	

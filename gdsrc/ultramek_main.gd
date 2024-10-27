@@ -3,7 +3,7 @@ extends Node
 
 signal connect_tcp_server_main
 signal request_board_signal(fname: String)
-signal request_deployment_signal(forces: Dictionary)
+signal request_players_signal(forces: Dictionary)
 
 const NODE_NAME: String = "Main"
 const DEFAULT_HOST: String = "127.0.0.1"
@@ -19,7 +19,15 @@ const BOARD3D_SCENE = preload("res://gdsrc/board/board3d.tscn")
 const CONNECT_SERVER_BUTTON: String = "ConnectButton"
 const NEW_GAME_BUTTON: String = "NewGameButton"
 
+const SETTING_FILE: String = "res://settings.json"
+const GAME_SETTINGS_KEY: String = "game_settings"
+const BOARD_KEY: String = "board"
+const PLAYER_KEY: String = "players"
+
 var game_client: UltraMekClient = null
+var players: Dictionary = {}
+var settings: Dictionary = {}
+var game_settings: Dictionary = {}
 
 # main menu buttons
 var main_menu_node: Node
@@ -32,14 +40,16 @@ var hud_node: Node
 # flags
 var main_menu_visible: bool = false
 var current_game_phase: String
+var settings_recieved: bool = false
 var board_recieved: bool = false 
 var forces_recieved: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#_tcp_server_connect()
+	await _read_settings(SETTING_FILE)
+	await _setup_game()
 	Global.main = self
-	_setup_game()
 
 func _tcp_server_connect()->String:
 	print("Alert: Main Menu Server Connect")
@@ -53,6 +63,10 @@ func _tcp_server_connect()->String:
 	Global.game_client = game_client
 	return "Server Start"
 
+func _read_settings(filename: String)->void:
+	settings = DataHandler.get_json_data(filename)
+	game_settings = DataHandler.get_json_data(settings[GAME_SETTINGS_KEY])
+
 func _hide_main_menu()->void:
 	main_menu_node.visible = false
 	main_menu_visible = false
@@ -61,9 +75,9 @@ func _show_main_menu()->void:
 	main_menu_node.visible = true
 	main_menu_visible = true
 
-func _new_game_start(fname: String,forces: Dictionary,settings: Dictionary)->void:
+func _new_game_start(fname: String,players: Dictionary,settings: Dictionary)->void:
 	_set_states()
-	_set_new_game_info(fname,forces,settings)
+	_set_new_game_info(fname,players,settings)
 	
 	if has_node(BOARD3D_NODE_NAME):
 		var board_node_temp = get_node(BOARD3D_NODE_NAME)
@@ -78,7 +92,7 @@ func _new_game_start(fname: String,forces: Dictionary,settings: Dictionary)->voi
 	if game_client._connect_tcp == true:
 		print("Alert: Game Start")
 		request_board_signal.emit(fname)
-		request_deployment_signal.emit(forces)
+		request_players_signal.emit(players)
 		
 		
 func _server_process(delta: float) -> void:
