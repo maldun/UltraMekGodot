@@ -13,6 +13,7 @@ const MAIN_MENU_NODE_NAME: String = "MainMenu"
 const TCP_NODE_NAME: String = "TCPClient"
 const BOARD3D_NODE_NAME: String = "Board3D"
 const HUD_NODE_NAME: String = "HUD"
+const DEPLOYMENT_HUD_SCENE: String = "res://gdsrc/hud/deployment_hud.tscn"
 
 const BOARD3D_SCENE = preload("res://gdsrc/board/board3d.tscn")
 
@@ -34,7 +35,7 @@ var connect_server_button: Node
 var new_game_button: Node
 
 var board_node: Node
-var hud_node: Node
+var deployment_hud_node: Node
 
 # flags
 var main_menu_visible: bool = false
@@ -147,6 +148,7 @@ func _process(delta: float) -> void:
 	_server_process(delta)
 	if game_client != null:
 		_game_start_process(delta)
+		_setup_hud(delta)
 		
 		
 	print("Alert: Game State: ",Global.game_state)
@@ -154,7 +156,7 @@ func _process(delta: float) -> void:
 	
 func _setup_game():
 	_setup_buttons()
-	_setup_hud()
+	#_setup_hud()
 	_set_mouse()
 	_set_states()
 
@@ -174,9 +176,17 @@ func _set_mouse():
 	#var beam = load("res://beam.png")
 	#Input.set_custom_mouse_cursor(arrow)
 	#Input.set_custom_mouse_cursor(beam, Input.CURSOR_IBEAM)
-func _setup_hud() -> void:
-	hud_node = find_child(HUD_NODE_NAME,true,false)
-	hud_node.visible = false
+func _setup_hud(delta: float) -> void:
+	#hud_node = find_child(HUD_NODE_NAME,true,false)
+	if Global.game_phase == Global.DEPLOYMENT_PHASE and deployment_hud_node == null:
+		var deployment_scene = preload(DEPLOYMENT_HUD_SCENE)
+		deployment_hud_node = deployment_scene.instantiate()
+		self.add_child(deployment_hud_node)
+		deployment_hud_node.visible = true
+	elif Global.game_phase != Global.DEPLOYMENT_PHASE and deployment_hud_node != null:
+		remove_child(deployment_hud_node)
+		deployment_hud_node.queue_free()
+		
 	
 func _setup_buttons():
 	main_menu_node = find_child(MAIN_MENU_NODE_NAME,true,false)

@@ -1,15 +1,15 @@
-[gd_scene load_steps=2 format=3 uid="uid://cnx8xbk0t1v5t"]
+[gd_scene load_steps=2 format=3 uid="uid://bqymgv27ai3in"]
 
-[ext_resource type="Script" path="res://gdsrc/hud/deployment_hud.gd" id="1_sdto2"]
+[ext_resource type="Script" path="res://gdsrc/hud/deployment_hud.gd" id="1_dgqsg"]
 
-[node name="HUD" type="Control"]
+[node name="DeploymentHud" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_sdto2")
+script = ExtResource("1_dgqsg")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -18,5 +18,5 @@ layout_direction = 3
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="DeploymentHud" type="VBoxContainer" parent="CanvasLayer/PanelContainer"]
+[node name="DeploymentButtons" type="VBoxContainer" parent="CanvasLayer/PanelContainer"]
 layout_mode = 2
