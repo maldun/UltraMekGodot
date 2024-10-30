@@ -1,12 +1,54 @@
 class_name Player
 extends Node
 
-var forces: Dictionary
+const FORCES_KEY: String = "forces"
+const ENTITIES_KEY: String = "entities"
+const CHASSIS_KEY: String = "chassis"
+const MODEL_KEY: String = "model"
+const GFX_DATA_KEY: String = "gfx_data"
+const IMAGE_2D_KEY: String = "gfx_2d_image"
 
+var player_data: Dictionary = {}
+var forces_gfx_data: Dictionary = {}
+var player_name: String = ""
+
+func setup_player(name: String, data: Dictionary):
+	player_name = name
+	player_data = data
+	
+	# store gfx data for later access
+	var forces: Dictionary = get_player_forces()
+	for member in forces.keys():
+		var member_data = forces[member]
+		var gfx_data_file: String = member_data[GFX_DATA_KEY]
+		var gfx_data: Dictionary = DataHandler.get_json_data(gfx_data_file)
+		forces_gfx_data[member] = gfx_data
+		
+	
+	
+func get_player_name()->String:
+	return player_name
+	
+func get_player_forces()->Dictionary:
+	return player_data[FORCES_KEY][ENTITIES_KEY]
+	
+func get_player_forces_images()->Dictionary:
+	var forces: Dictionary = get_player_forces()
+	var pictures: Dictionary = {}
+	for member in forces.keys():
+		var picture_data = {}
+		var member_data = forces[member]
+		picture_data[CHASSIS_KEY]=member_data[CHASSIS_KEY]
+		picture_data[MODEL_KEY]=member_data[MODEL_KEY]
+		picture_data[IMAGE_2D_KEY] = forces_gfx_data[member][IMAGE_2D_KEY]
+		pictures[member] = picture_data
+		
+	return pictures
+		
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	forces = {}
+	pass
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -20,6 +20,7 @@ var game_phase: String = ""
 var game_state: Dictionary = {}
 var board_data: Dictionary = {}
 var ultra_mek_cpp: UltraMekGD = UltraMekGD.new()
+var players: Dictionary = {}
 
 var main: Node = null
 var game_client: Node = null

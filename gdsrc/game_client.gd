@@ -12,8 +12,11 @@ const MAP_RQ: String = "BOARD_REQUEST"
 const PLA_RQ: String = "PLAYER_REQUEST"
 const FILENAME: String = 'filename'
 
+const RECIEVED_BOARD_SIGNAL = "recieved_board"
+const RECIEVED_PLAYER_SIGNAL = "recieved_player_data"
+
 signal recieved_board(board_json)
-signal recieved_deployment_data(deployment_json)
+signal recieved_player_data(deployment_json)
 
 #const Client = preload("res://tcp_client.gd")
 #var _client: Client = Client.new()
@@ -88,8 +91,8 @@ func request_players(players: Dictionary):
 		var answer_dict = JSON.parse_string(answer)
 		if answer_dict != null:
 			var recieved_players = answer_dict[PLA_RQ] 
-			print("Answer: ", recieved_players)
-			recieved_deployment_data.emit(recieved_players)
+			print("Answer (Players): ", recieved_players)
+			recieved_player_data.emit(recieved_players)
 			deployment_requested = false
 
 func start_requesting_players(players_rec: Dictionary):
@@ -105,7 +108,7 @@ func _process_routine(delta: float) -> void:
 			await request_board(board_fname)
 		
 		await main_node.connect("request_players_signal",start_requesting_players)
-		if main_node.forces_recieved == false:
+		if main_node.players_recieved == false:
 			await request_players(players)
 		
 	

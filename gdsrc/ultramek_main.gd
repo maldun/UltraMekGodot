@@ -25,7 +25,6 @@ const BOARD_KEY: String = "board"
 const PLAYER_KEY: String = "players"
 
 var game_client: UltraMekClient = null
-var players: Dictionary = {}
 var settings: Dictionary = {}
 var game_settings: Dictionary = {}
 
@@ -42,7 +41,9 @@ var main_menu_visible: bool = false
 var current_game_phase: String
 var settings_recieved: bool = false
 var board_recieved: bool = false 
-var forces_recieved: bool = false
+var players_recieved: bool = false
+var game_settings_set: bool = false
+var game_set_up: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -99,23 +100,44 @@ func _server_process(delta: float) -> void:
 	var status = await connect_server_button.connect("connect_tcp_server",_tcp_server_connect)
 
 func _game_start_process(delta: float)->void:
-	if game_client._connect_tcp == true:
+	if game_client._connect_tcp == true: 
 		if new_game_button.disabled == true:
 			new_game_button.disabled = false
 		new_game_button.connect("new_game_start",_new_game_start)
 	else:
 		new_game_button.disabled = true
+		
+	if Global.game_phase == Global.PREPARATION_PHASE:
+		await Global.connect("processed_board_data",_collect_board_data)
+		game_client.connect("recieved_player_data",_collect_player_data)
+		if _check_game_ready(delta) == true:
+			Global.game_phase = Global.DEPLOYMENT_PHASE
 
 func _collect_board_data(dim_x:int,dim_y:int)->void:
 	print("Alert: Board data recieved!")
 	board_recieved = true
 	Global.game_state["board_state"] = {"dim_x":dim_x,"dim_y":dim_y,"active":true}
-	Global.game_phase = Global.DEPLOYMENT_PHASE
+	
+func _check_game_ready(delta: float)->bool:
+	if board_recieved==true and players_recieved==true and game_settings_set:
+		return true
+	else:
+		return false
+
+
+func _collect_player_data(player_data: Dictionary)->void:
+	for name in player_data.keys():
+		var player: Player = Player.new()
+		player.setup_player(name,player_data[name])
+		Global.players[name] = player
+		print("Added Player: ",player.get_player_name())
+	players_recieved = true
 	
 func _set_new_game_info(board: String,forces: Dictionary, settings: Dictionary):
 	Global.game_metadata[Global._BOARD_KEY] = board
 	Global.game_metadata[Global._FORCES_KEY] = forces
 	Global.game_metadata[Global._SETTINGS_KEY] = settings
+	game_settings_set = true
 
 func _start_deployment()-> void:
 	pass
@@ -125,7 +147,8 @@ func _process(delta: float) -> void:
 	_server_process(delta)
 	if game_client != null:
 		_game_start_process(delta)
-	await Global.connect("processed_board_data",_collect_board_data)
+		
+		
 	print("Alert: Game State: ",Global.game_state)
 	print("Alert: Game Phase: ",Global.game_phase)
 	
@@ -139,7 +162,7 @@ func _set_states() -> void:
 	Global.game_phase = Global.PREPARATION_PHASE
 	current_game_phase = Global.game_phase
 	board_recieved = false
-	forces_recieved = false
+	players_recieved = false
 
 func _set_mouse():
 	Input.set_default_cursor_shape(Input.CURSOR_ARROW)

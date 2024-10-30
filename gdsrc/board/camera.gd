@@ -11,8 +11,10 @@ signal change_menu_visibility
 var mouse_sense: float = 0.005
 var speed: float = 1.0
 var rot_speed: float = speed*PI/45
+#flags
 var ctrl_pressed: bool = false
 var menu_hidden: bool = false
+var deployment_zone_selected: bool = false
 var camera_node: Node
 var walk_light_node: Node
 var ultra_mek: UltraMekGD = UltraMekGD.new()
@@ -80,9 +82,19 @@ func keyboard_events(event: InputEventKey) -> void:
 		var rot: Vector3 = get_rotation()
 		var valx: float = -PI/2-rot[0]
 		var valy: float = 0-rot[1]
-		print("Rotation: ",rot," ",rot[0]+valx," ", rot[1]+valy)
 		rotate_x(-3*PI/2+valx)
 		rotate_y(valy)
+
+func left_click_events(event: InputEvent)->void:
+	if Global.game_phase == Global.DEPLOYMENT_PHASE:
+		if event.is_pressed():
+			if deployment_zone_selected == false:
+				deployment_zone_selected = true
+			else:
+				deployment_zone_selected = false
+			
+
+	print("deployment zone selected: ",deployment_zone_selected)
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventWithModifiers:
@@ -90,12 +102,15 @@ func _input(event: InputEvent) -> void:
 			rotate_x(event.relative.y*mouse_sense)
 			rotate_y(-event.relative.x*mouse_sense)
 		elif event is InputEventMouseMotion:
-			walk_cursor(event)
+			if deployment_zone_selected == false:
+				walk_cursor(event)
 		elif event is InputEventMouseButton:
 			if event.get_button_index() == MOUSE_BUTTON_WHEEL_DOWN:
 				translate(Vector3(0,speed,0))
 			if event.get_button_index() == MOUSE_BUTTON_WHEEL_UP:
 				translate(Vector3(0,-speed,0))
+			if event.get_button_index() == MOUSE_BUTTON_LEFT:
+				left_click_events(event)
 		elif event is InputEventKey:
 			keyboard_events(event)
 		else:

@@ -4,7 +4,7 @@ extends MeshInstance3D
 var hex: Hex
 var center: Vector3
 
-func create_standee(fname: String):
+func create_standee(fname: String,texture_img: String="res://Atlas_7DR.png"):
 	
 	var s = UltraMekGD.new()
 	s.set_unit_length(Hex.unit_length)
@@ -19,7 +19,7 @@ func create_standee(fname: String):
 	hex = Hex.new()
 	var hex_name = "Standee"
 	var material2 = StandardMaterial3D.new()
-	var texture = load("res://Atlas_7DR.png")
+	var texture = load(texture_img)
 	material2.albedo_texture = texture
 	
 	var material = StandardMaterial3D.new()
