@@ -21,9 +21,13 @@ var game_state: Dictionary = {}
 var board_data: Dictionary = {}
 var ultra_mek_cpp: UltraMekGD = UltraMekGD.new()
 var players: Dictionary = {}
+var active_player: Player = null
 
+# nodes
 var main: Node = null
 var game_client: Node = null
+var controls: Node = null
+var sound: Node = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

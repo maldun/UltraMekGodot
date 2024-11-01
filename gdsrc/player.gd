@@ -7,14 +7,20 @@ const CHASSIS_KEY: String = "chassis"
 const MODEL_KEY: String = "model"
 const GFX_DATA_KEY: String = "gfx_data"
 const IMAGE_2D_KEY: String = "gfx_2d_image"
+const COLOR_KEY: String = "color"
+const DEFAULT_ALPHA: float = 0.5
 
 var player_data: Dictionary = {}
 var forces_gfx_data: Dictionary = {}
 var player_name: String = ""
+var player_color: Color
 
 func setup_player(name: String, data: Dictionary):
 	player_name = name
 	player_data = data
+	
+	# get color
+	player_color = get_player_color(DEFAULT_ALPHA)
 	
 	# store gfx data for later access
 	var forces: Dictionary = get_player_forces()
@@ -31,7 +37,12 @@ func get_player_name()->String:
 	
 func get_player_forces()->Dictionary:
 	return player_data[FORCES_KEY][ENTITIES_KEY]
-	
+
+func get_player_color(alpha:float = DEFAULT_ALPHA)->Color:
+	var color_data: Array = player_data[COLOR_KEY]
+	var color: Color = Color(color_data[0],color_data[1],color_data[2],alpha)
+	return color
+
 func get_player_forces_images()->Dictionary:
 	var forces: Dictionary = get_player_forces()
 	var pictures: Dictionary = {}
@@ -49,7 +60,6 @@ func get_player_forces_images()->Dictionary:
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

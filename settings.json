@@ -1,3 +1,5 @@
 {
-"game_settings": "game_settings.json"
+"game_settings": "game_settings.json",
+"sounds_map": "res://assets/sounds/sounds.json",
+"sounds_default_path": "res://assets/sounds/"
 }

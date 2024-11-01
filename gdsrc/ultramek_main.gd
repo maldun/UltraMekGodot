@@ -5,11 +5,15 @@ signal connect_tcp_server_main
 signal request_board_signal(fname: String)
 signal request_players_signal(forces: Dictionary)
 
+signal deploy_unit_signal(player_name: String, unit_id: String)
+const DEPLOY_UNIT_SIGNAL: String = "deploy_unit_signal"
+
 const NODE_NAME: String = "Main"
 const DEFAULT_HOST: String = "127.0.0.1"
 const DEFAULT_PORT: int = 8563
 
 const MAIN_MENU_NODE_NAME: String = "MainMenu"
+const SOUND_NODE_NAME: String = "Sound"
 const TCP_NODE_NAME: String = "TCPClient"
 const BOARD3D_NODE_NAME: String = "Board3D"
 const HUD_NODE_NAME: String = "HUD"
@@ -24,6 +28,7 @@ const SETTING_FILE: String = "res://settings.json"
 const GAME_SETTINGS_KEY: String = "game_settings"
 const BOARD_KEY: String = "board"
 const PLAYER_KEY: String = "players"
+const DEPLOYMENT_HUD_NAME: String = "DeploymentHud"
 
 var game_client: UltraMekClient = null
 var settings: Dictionary = {}
@@ -133,6 +138,7 @@ func _collect_player_data(player_data: Dictionary)->void:
 		Global.players[name] = player
 		print("Added Player: ",player.get_player_name())
 	players_recieved = true
+	Global.active_player = Global.players["player1"]
 	
 func _set_new_game_info(board: String,forces: Dictionary, settings: Dictionary):
 	Global.game_metadata[Global._BOARD_KEY] = board
@@ -140,8 +146,14 @@ func _set_new_game_info(board: String,forces: Dictionary, settings: Dictionary):
 	Global.game_metadata[Global._SETTINGS_KEY] = settings
 	game_settings_set = true
 
-func _start_deployment()-> void:
-	pass
+func _deploy_unit(player_name: String, unit_id: String):
+	print("unit deployed: ", player_name,unit_id)
+	deploy_unit_signal.emit(player_name, unit_id)
+
+func _deployment_process(delta: float)->void:
+	if deployment_hud_node != null:
+		deployment_hud_node.connect(DeploymentHud.DEPLOYMENT_UNIT_CONFIRMED_SIGNAL,
+		_deploy_unit)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -149,6 +161,7 @@ func _process(delta: float) -> void:
 	if game_client != null:
 		_game_start_process(delta)
 		_setup_hud(delta)
+		_deployment_process(delta)
 		
 		
 	print("Alert: Game State: ",Global.game_state)
@@ -156,9 +169,14 @@ func _process(delta: float) -> void:
 	
 func _setup_game():
 	_setup_buttons()
-	#_setup_hud()
 	_set_mouse()
 	_set_states()
+	_setup_sound()
+	
+func _setup_sound():
+	Global.sound = UltraMekSound.new()
+	Global.sound.set_name(SOUND_NODE_NAME)
+	add_child(Global.sound)
 
 func _set_states() -> void:
 	Global.game_phase = Global.PREPARATION_PHASE
@@ -176,17 +194,21 @@ func _set_mouse():
 	#var beam = load("res://beam.png")
 	#Input.set_custom_mouse_cursor(arrow)
 	#Input.set_custom_mouse_cursor(beam, Input.CURSOR_IBEAM)
+	
 func _setup_hud(delta: float) -> void:
-	#hud_node = find_child(HUD_NODE_NAME,true,false)
+	_setup_deployment_hud(delta)
+	
+func _setup_deployment_hud(delta: float)->void:
 	if Global.game_phase == Global.DEPLOYMENT_PHASE and deployment_hud_node == null:
 		var deployment_scene = preload(DEPLOYMENT_HUD_SCENE)
 		deployment_hud_node = deployment_scene.instantiate()
+		deployment_hud_node.set_name(DEPLOYMENT_HUD_NAME)
 		self.add_child(deployment_hud_node)
 		deployment_hud_node.visible = true
 	elif Global.game_phase != Global.DEPLOYMENT_PHASE and deployment_hud_node != null:
 		remove_child(deployment_hud_node)
 		deployment_hud_node.queue_free()
-		
+
 	
 func _setup_buttons():
 	main_menu_node = find_child(MAIN_MENU_NODE_NAME,true,false)
