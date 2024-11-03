@@ -5,7 +5,7 @@ signal connect_tcp_server_main
 signal request_board_signal(fname: String)
 signal request_players_signal(forces: Dictionary)
 
-signal deploy_unit_signal(player_name: String, unit_id: String)
+signal deploy_unit_signal(player_name: String, unit_id: String,pos: Vector3)
 const DEPLOY_UNIT_SIGNAL: String = "deploy_unit_signal"
 
 const NODE_NAME: String = "Main"
@@ -39,7 +39,6 @@ var main_menu_node: Node
 var connect_server_button: Node 
 var new_game_button: Node
 
-var board_node: Node
 var deployment_hud_node: Node
 
 # flags
@@ -93,7 +92,7 @@ func _new_game_start(fname: String,players: Dictionary,settings: Dictionary)->vo
 	var board_scene = BOARD3D_SCENE.instantiate()
 	board_scene.name = BOARD3D_NODE_NAME
 	add_child(board_scene)
-	board_node = board_scene
+	Global.board = board_scene
 	
 	_hide_main_menu()
 	if game_client._connect_tcp == true:
@@ -146,9 +145,9 @@ func _set_new_game_info(board: String,forces: Dictionary, settings: Dictionary):
 	Global.game_metadata[Global._SETTINGS_KEY] = settings
 	game_settings_set = true
 
-func _deploy_unit(player_name: String, unit_id: String):
-	print("unit deployed: ", player_name,unit_id)
-	deploy_unit_signal.emit(player_name, unit_id)
+func _deploy_unit(player_name: String, unit_id: String, pos: Vector3):
+	print("unit deployed: ", player_name,unit_id,pos)
+	deploy_unit_signal.emit(player_name, unit_id,pos)
 
 func _deployment_process(delta: float)->void:
 	if deployment_hud_node != null:

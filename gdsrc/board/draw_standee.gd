@@ -1,11 +1,13 @@
-class_name StandeePrimitive
+class_name StandeePrimitiveMesh
 extends MeshInstance3D
+
+const STANDEE_PREFIX: String = "Standee_"
 
 var hex: Hex
 var center: Vector3
 
-func create_standee(fname: String,texture_img: String="res://Atlas_7DR.png"):
-	
+func create_standee(fname: String,texture_img: String="res://Atlas_7DR.png", 
+				   color: Color = Color(1,0,0)):
 	var s = UltraMekGD.new()
 	s.set_unit_length(Hex.unit_length)
 	var data = DataHandler.get_json_data(fname)
@@ -15,15 +17,16 @@ func create_standee(fname: String,texture_img: String="res://Atlas_7DR.png"):
 	var centers = s.create_grid_centers(2,2)
 	var center = centers[0][0]
 	
-	# 
+	# add new_hex
 	hex = Hex.new()
-	var hex_name = "Standee"
+	var hex_name = STANDEE_PREFIX
 	var material2 = StandardMaterial3D.new()
-	var texture = load(texture_img)
+	#var texture = load(texture_img)
+	var texture = UltraMekTools.color_up(texture_img,color)
 	material2.albedo_texture = texture
 	
 	var material = StandardMaterial3D.new()
-	var rgb: Color = Color(1,0,0)
+	var rgb: Color = color
 	material.albedo_color = Color(rgb[0], rgb[1], rgb[2])
 	hex.set_name(hex_name)
 	hex.mesh = ArrayMesh.new()
@@ -38,11 +41,9 @@ func create_standee(fname: String,texture_img: String="res://Atlas_7DR.png"):
 	
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	center = create_standee("res://assets/hexes/hexa_h-5.json")
+	pass
+	#center = create_standee("res://assets/hexes/hexa_h-5.json")
 	#global_translate(center)
-	
-	
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

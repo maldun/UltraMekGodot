@@ -25,7 +25,7 @@ func _load_sounds(sound_file_map: Dictionary) -> void:
 		else:
 			sound_map[key] = load(sound_default_path + "/" + sound_file_map[key])
 
-func _play_landing_sound(player_name: String,unit_id: String):
+func _play_landing_sound(player_name: String,unit_id: String, pos: Vector3):
 	set_stream(sound_map[LANDING])
 	play()
 	

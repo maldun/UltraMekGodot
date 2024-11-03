@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://subml1gd2r76"]
+[gd_scene load_steps=10 format=3 uid="uid://subml1gd2r76"]
 
 [ext_resource type="Texture2D" uid="uid://to2tqdgnaij1" path="res://assets/menu/UltraMek_textlogo.png" id="1_bvmuw"]
 [ext_resource type="Texture2D" uid="uid://hee3a4xiy6eu" path="res://assets/menu/connect_server.png" id="2_ui0h1"]
@@ -8,7 +8,27 @@
 [ext_resource type="Script" path="res://gdsrc/menu/quit_button.gd" id="4_kxjpd"]
 [ext_resource type="Script" path="res://gdsrc/menu/new_game_button.gd" id="5_3iw16"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_4a4tu"]
+[sub_resource type="Shader" id="Shader_jcja6"]
+code = "shader_type canvas_item;
+
+void vertex() {
+	// Called for every vertex the material is visible on.
+}
+
+void fragment() {
+	vec4 some_color = vec4(1,1,1,1);
+	COLOR = some_color;
+	// Called for every pixel the material is visible on.
+}
+
+//void light() {
+	// Called for every pixel for every light affecting the CanvasItem.
+	// Uncomment to replace the default light processing function with this one.
+//}
+"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_brs4w"]
+shader = SubResource("Shader_jcja6")
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -18,8 +38,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+scale = Vector2(39.9611, 25.72)
+color = Color(0.753983, 0.753984, 0.753983, 1)
+
 [node name="MarginMenu" type="MarginContainer" parent="."]
-material = SubResource("ShaderMaterial_4a4tu")
+material = SubResource("ShaderMaterial_brs4w")
 layout_mode = 0
 offset_left = 16.0
 offset_top = 20.0

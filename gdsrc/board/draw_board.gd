@@ -186,6 +186,13 @@ func _recieved_board(recieved_map) -> void:
 	Global.board_data = recieved_map
 	create_board(recieved_map)
 
+func _deploy_unit(player_name: String, unit_id: String, pos: Vector3):
+	var fig: Node = Global.players[player_name].add_figure(unit_id)
+	add_child(fig)
+	fig.set_global_position(pos)
+	fig.deploy(player_name,unit_id,pos)
+	
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	#var mm = get_tree().get_root().get_node(UltraMekMain.NODE_NAME)
@@ -195,4 +202,7 @@ func _process(delta: float) -> void:
 	var client_node = Global.game_client
 	if client_node != null:
 		await client_node.connect("recieved_board",_recieved_board)
+		
+	if Global.main != null:
+		Global.main.connect(UltraMekMain.DEPLOY_UNIT_SIGNAL,_deploy_unit)
 	

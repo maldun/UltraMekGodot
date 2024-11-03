@@ -1,0 +1,5 @@
+{
+"players":{"player1":{"Name":"Player","forces":"test/samples/player1.mul","deployment_border":"S","color":[0.5,0,0]}},
+"board":"test/samples/snow.board",
+"game_settings":{"session_type":"hot_seat"}
+}

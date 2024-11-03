@@ -9,9 +9,11 @@ const GFX_DATA_KEY: String = "gfx_data"
 const IMAGE_2D_KEY: String = "gfx_2d_image"
 const COLOR_KEY: String = "color"
 const DEFAULT_ALPHA: float = 0.5
+const PLAYER_PREFFIX: String = "Player_"
 
 var player_data: Dictionary = {}
 var forces_gfx_data: Dictionary = {}
+var figures: Dictionary = {}
 var player_name: String = ""
 var player_color: Color
 
@@ -29,9 +31,16 @@ func setup_player(name: String, data: Dictionary):
 		var gfx_data_file: String = member_data[GFX_DATA_KEY]
 		var gfx_data: Dictionary = DataHandler.get_json_data(gfx_data_file)
 		forces_gfx_data[member] = gfx_data
-		
-	
-	
+
+func get_figure_id(unit_id: String)->String:
+	return PLAYER_PREFFIX + player_name+'_'+unit_id
+
+func add_figure(unit_id: String)->Node:
+	var fig: UltraMekFigure = UltraMekFigure.new()
+	fig.set_name(get_figure_id(unit_id))
+	figures[unit_id] = fig
+	return fig
+
 func get_player_name()->String:
 	return player_name
 	

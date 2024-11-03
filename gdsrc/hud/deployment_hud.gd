@@ -7,7 +7,7 @@ const DEPLOYMENT_LOGO: String = "res://assets/menu/deploy.png"
 const DEPLOYMENT_CONFIRM_BUTTON_NAME: String = "confirm_button"
 const CURR_PLAYER_KEY: String = "curr_player"
 const CURR_UNIT_KEY: String = "curr_unit"
-
+const CURR_MAP_POS: String = "current_map_pos"
 
 var preparation_hud: Node
 var deployment_buttons: Node
@@ -24,7 +24,7 @@ const DEPLOYMENT_BUTTON_PRESSED_SIGNAL = "deployment_button_pressed"
 signal deployment_button_pressed(player_name: String, button_id: String)
 
 const DEPLOYMENT_UNIT_CONFIRMED_SIGNAL = "deploy_unit_confirmed"
-signal deploy_unit_confirmed(player_name: String,unit_id: String)
+signal deploy_unit_confirmed(player_name: String,unit_id: String,unit_pos: Vector3)
 
 func _ready_up_node(name: String) -> Node:
 	var node: Node = find_child(name,true,false)
@@ -74,24 +74,7 @@ func to_grey_scale(image_fname: String)->ImageTexture:
 	
 	var new_texture = ImageTexture.create_from_image(image)
 	return new_texture
-	
-func color_up(image_fname: String,player_color: Color)->ImageTexture:
-	#var image: Image = Image.new()
-	var image = Image.load_from_file(image_fname)
-	#image.lock()
-	for i in image.get_size().x:
-		for j in image.get_size().y:
-			var current_pixel = image.get_pixel(i,j)
-			if current_pixel.a == 1:
-				current_pixel = current_pixel.darkened(0.5)#current_pixel.gray()
-				#var new_color = Color.from_hsv(0,0,current_pixel)
-				#var new_color = Color(current_pixel,0.5)
-				var new_color = current_pixel.blend(player_color)
-				image.set_pixel(i,j,new_color)
-	#image.unlock()
-	
-	var new_texture = ImageTexture.create_from_image(image)
-	return new_texture
+
 
 func _setup_deployment_hud()->void:
 	logo = Button.new()
@@ -117,7 +100,7 @@ func _setup_entity_button(entity: Dictionary)->Button:
 	var picture: String = entity["gfx_2d_image"]
 	#var texture = load("res://" + picture)
 	var player_color: Color = Color(0.5,0,0,0.5)
-	var texture = color_up(picture,player_color)
+	var texture = UltraMekTools.color_up(picture,player_color)
 	
 	entity_button.icon = texture
 	#entity_button.disabled=true
@@ -130,6 +113,7 @@ func _setup_entity_button(entity: Dictionary)->Button:
 	entity_button.set_text_alignment(HORIZONTAL_ALIGNMENT_CENTER)
 	entity_button.set_icon_alignment(HORIZONTAL_ALIGNMENT_CENTER)
 	entity_button.set_vertical_icon_alignment(VERTICAL_ALIGNMENT_TOP)
+	entity_button.flat = true
 	return entity_button
 	
 
@@ -169,10 +153,11 @@ func _check_button_pressed(delta: float)->void:
 				deployment_button_pressed.emit(player_name,key)
 			
 
-func _deploy_unit_recieved(player_name,unit_id)->void:
+func _deploy_unit_recieved(player_name: String,unit_id:String, pos: Vector3)->void:
 	if logo != null:
 		logo.disabled = false
-		current_unit = {CURR_PLAYER_KEY: player_name,CURR_UNIT_KEY:unit_id}
+		current_unit = {CURR_PLAYER_KEY: player_name,CURR_UNIT_KEY:unit_id,
+						CURR_MAP_POS:pos}
 
 func _deployment_button_activate(delta: float)->void:
 	if Global.controls != null:
@@ -183,7 +168,8 @@ func _deployment_button_press(delta: float)->void:
 		if logo.disabled == false and logo.is_pressed():
 			var curr_player: String = current_unit[CURR_PLAYER_KEY]
 			var curr_unit: String = current_unit[CURR_UNIT_KEY]
-			deploy_unit_confirmed.emit(curr_player,curr_unit)
+			var curr_pos: Vector3 = current_unit[CURR_MAP_POS]
+			deploy_unit_confirmed.emit(curr_player,curr_unit,curr_pos)
 			print("Deployment confirmed!")
 			logo.disabled = true
 			current_unit = {}

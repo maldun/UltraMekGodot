@@ -1,31 +1,48 @@
-[gd_scene load_steps=4 format=3 uid="uid://wrr7vj3ftaot"]
+[gd_scene load_steps=7 format=3 uid="uid://wrr7vj3ftaot"]
 
 [ext_resource type="Script" path="res://gdsrc/board/draw_board.gd" id="1_atixd"]
+[ext_resource type="PackedScene" uid="uid://b4kgdygb4srs5" path="res://gdsrc/board/standee_primitive_3d.tscn" id="2_nmaqb"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_gad1t"]
 rough = true
 bounce = 0.29
 
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_u0fjt"]
+
+[sub_resource type="Sky" id="Sky_sdp80"]
+sky_material = SubResource("ProceduralSkyMaterial_u0fjt")
+process_mode = 1
+radiance_size = 6
+
 [sub_resource type="Environment" id="Environment_v2slx"]
 background_mode = 2
-background_color = Color(0.756019, 0.196567, 1, 1)
-background_energy_multiplier = 0.86
-ambient_light_source = 3
+background_color = Color(1, 1, 1, 1)
+background_energy_multiplier = 2.5
+sky = SubResource("Sky_sdp80")
 ambient_light_color = Color(0.568783, 0.711122, 0.864691, 1)
-ambient_light_energy = 14.22
+ambient_light_energy = 16.0
+reflected_light_source = 2
+glow_enabled = true
 fog_light_color = Color(0.373255, 0.582397, 0.683872, 1)
 fog_light_energy = 2.06
 volumetric_fog_enabled = true
+volumetric_fog_density = 1.0
+volumetric_fog_emission = Color(0.194349, 0.194349, 0.194349, 1)
+volumetric_fog_emission_energy = 1024.0
 volumetric_fog_gi_inject = 0.0
-volumetric_fog_length = 152.34
+volumetric_fog_length = 0.01
 volumetric_fog_ambient_inject = 4.17
+volumetric_fog_sky_affect = 0.099
 
 [node name="Board3D" type="Node3D"]
 
 [node name="OmniLight3D" type="OmniLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.99236, 17.2814, -8.03047)
+visible = false
 light_energy = 16.0
-light_indirect_energy = 16.0
+light_indirect_energy = 10.0
+light_size = 1.0
+light_specular = 6.772
 omni_range = 4096.0
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
@@ -43,3 +60,7 @@ script = ExtResource("1_atixd")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_v2slx")
+
+[node name="StandeePrimitive3D" parent="." instance=ExtResource("2_nmaqb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.585, 4, -18.979)
+visible = false

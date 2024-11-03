@@ -16,6 +16,7 @@ const DAMAGE_PHASE: String = "__DAMAGE_PHASE__"
 
 signal processed_board_data(dim_x: int, dim_y: int)
 
+# Important game variables
 var game_phase: String = ""
 var game_state: Dictionary = {}
 var board_data: Dictionary = {}
@@ -28,6 +29,7 @@ var main: Node = null
 var game_client: Node = null
 var controls: Node = null
 var sound: Node = null
+var board: Node = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
