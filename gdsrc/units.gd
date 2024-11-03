@@ -1,4 +1,4 @@
-class_name UltraMekFigure
+class_name UltraMekUnit
 extends Node3D
 
 const SPAWN_ANIMATION_PREFIX: String = "Spawn_"
@@ -12,6 +12,8 @@ var figure_created: bool = false
 var figure_deployed: bool = false
 var spawn_animation: Node3D = null
 var player: Player
+var unit_data: Dictionary
+var unit_direction: Global.DIRECTIONS = Global.DIRECTIONS.N
 var unit_id: String
 var current_pos: Vector3
 var timer: float = 0

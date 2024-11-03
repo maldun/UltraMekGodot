@@ -36,7 +36,7 @@ func get_figure_id(unit_id: String)->String:
 	return PLAYER_PREFFIX + player_name+'_'+unit_id
 
 func add_figure(unit_id: String)->Node:
-	var fig: UltraMekFigure = UltraMekFigure.new()
+	var fig: UltraMekUnit = UltraMekUnit.new()
 	fig.set_name(get_figure_id(unit_id))
 	figures[unit_id] = fig
 	return fig

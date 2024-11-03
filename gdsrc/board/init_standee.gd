@@ -14,21 +14,23 @@ func init_standee(texture_img: String, color: Color)->void:
 	var center = standee.center
 	var rigid_body = RigidBody3D.new()
 	var physics_material: PhysicsMaterial = PhysicsMaterial.new()
-	physics_material.friction = 1
+	physics_material.rough=true
 	physics_material.friction=1
 	physics_material.bounce=0
 	
 	rigid_body.physics_material_override = physics_material
-	rigid_body.mass = 1.0
+	rigid_body.set_mass(1.0)
+	rigid_body.set_lock_rotation_enabled(true)
 	
 	var col_shape = CollisionShape3D.new()
 	col_shape.shape = CylinderShape3D.new()
 	col_shape.shape.height = 0.2
 	col_shape.shape.radius = 0.5
 	col_shape.shape.margin = 0.04
-	center[2] = center[2] + 0.5
-	center[1] = center[1] + 0.2
-	center[0] = center[0] -0.5
+	
+	center[2] = center[2] + 0.4
+	center[1] = center[1] + 0.0
+	center[0] = center[0] - 0.5
 	standee.translate(center)
 	col_shape.add_child(standee)
 	rigid_body.add_child(col_shape)

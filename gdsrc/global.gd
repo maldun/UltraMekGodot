@@ -16,6 +16,9 @@ const DAMAGE_PHASE: String = "__DAMAGE_PHASE__"
 
 signal processed_board_data(dim_x: int, dim_y: int)
 
+# Directions
+enum DIRECTIONS {N,NE,SE,S,SW,NW}
+
 # Important game variables
 var game_phase: String = ""
 var game_state: Dictionary = {}
