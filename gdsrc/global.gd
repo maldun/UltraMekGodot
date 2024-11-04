@@ -17,7 +17,7 @@ const DAMAGE_PHASE: String = "__DAMAGE_PHASE__"
 signal processed_board_data(dim_x: int, dim_y: int)
 
 # Directions
-enum DIRECTIONS {N,NE,SE,S,SW,NW}
+enum DIRECTIONS {SE,S,SW,NW,N,NE}
 
 # Important game variables
 var game_phase: String = ""
@@ -26,6 +26,10 @@ var board_data: Dictionary = {}
 var ultra_mek_cpp: UltraMekGD = UltraMekGD.new()
 var players: Dictionary = {}
 var active_player: Player = null
+
+# Geometry
+const UNIT_LENGTH: float = 1.0
+const UNIT_HEIGTH: float = 0.5
 
 # nodes
 var main: Node = null
@@ -36,8 +40,8 @@ var board: Node = null
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
-
+	ultra_mek_cpp.set_unit_length(UNIT_LENGTH)
+	ultra_mek_cpp.set_unit_height(UNIT_HEIGTH)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

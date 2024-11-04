@@ -1,8 +1,8 @@
 class_name Board
 extends Node3D
 
-const unit_length: float = 1.0
-const unit_height: float = 0.5
+const unit_length: float = Global.UNIT_LENGTH
+const unit_height: float = Global.UNIT_HEIGTH
 const PNG: String = ".png"
 
 const top_mat = "res://grass_h_swamp_0.png"

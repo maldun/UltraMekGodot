@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://b4kgdygb4srs5"]
+[gd_scene load_steps=8 format=3 uid="uid://b4kgdygb4srs5"]
 
 [ext_resource type="Script" path="res://gdsrc/board/init_standee.gd" id="1_8jtql"]
 [ext_resource type="Script" path="res://gdsrc/board/draw_standee.gd" id="1_gohut"]
@@ -8,6 +8,21 @@
 height = 0.2
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_s522c"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ht75i"]
+transparency = 1
+albedo_color = Color(0, 128.498, 0, 0.498039)
+metallic = 0.5
+metallic_specular = 0.0
+normal_scale = 5.65
+
+[sub_resource type="PrismMesh" id="PrismMesh_5x68u"]
+lightmap_size_hint = Vector2i(23, 16)
+material = SubResource("StandardMaterial3D_ht75i")
+size = Vector3(2, 1, 0.1)
+subdivide_width = 3
+subdivide_height = 3
+subdivide_depth = 3
 
 [node name="StandeePrimitive3D" type="Node3D"]
 script = ExtResource("1_8jtql")
@@ -29,3 +44,7 @@ shape = SubResource("CylinderShape3D_ijed2")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RigidBody3D/CollisionShape3D"]
 mesh = SubResource("ArrayMesh_s522c")
 script = ExtResource("1_gohut")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1.19249e-08, 1, 0, -1, 1.19249e-08, 0, 0, 0)
+mesh = SubResource("PrismMesh_5x68u")

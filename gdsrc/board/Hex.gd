@@ -1,8 +1,8 @@
 class_name Hex
 extends MeshInstance3D
 
-const unit_length = 1.0
-const unit_height = 0.5
+const unit_length = Global.UNIT_LENGTH
+const unit_height = Global.UNIT_HEIGTH
 const PI = atan(1)*4
 
 const top_mat = "res://grass_h_swamp_0.png"
