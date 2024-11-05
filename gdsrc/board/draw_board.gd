@@ -186,6 +186,23 @@ func _recieved_board(recieved_map) -> void:
 	Global.board_data = recieved_map
 	create_board(recieved_map)
 
+func _rotate_deployment_pointer(player_name: String, unit_id: String, pos: Vector3, mouse_pos:Vector2):
+	var player: Player = Global.players[player_name]
+	var pointer: UltraMekDirectionPointer = null
+	if player.pointer_exists(unit_id):
+		pointer = player.get_pointer(unit_id)
+	else:
+		pointer = player.add_pointer(unit_id)
+		add_child(pointer)
+		pointer.place(player_name,unit_id,pos)
+		pointer.set_global_position(pos)
+		
+	
+	var phi: Global.DIRECTIONS = pointer.compute_dir_from_mouse_position(mouse_pos)
+	print("rotate pointer!",mouse_pos,phi)
+	pointer.rotate_pointer(phi)
+	
+
 func _deploy_unit(player_name: String, unit_id: String, pos: Vector3):
 	var fig: Node = Global.players[player_name].add_figure(unit_id)
 	add_child(fig)
@@ -202,6 +219,9 @@ func _process(delta: float) -> void:
 	var client_node = Global.game_client
 	if client_node != null:
 		await client_node.connect("recieved_board",_recieved_board)
+		
+	if Global.controls != null:
+		Global.controls.connect(UltraMekControls.ROTATE_DEPL_POINTER_SIGNAL,_rotate_deployment_pointer)
 		
 	if Global.main != null:
 		Global.main.connect(UltraMekMain.DEPLOY_UNIT_SIGNAL,_deploy_unit)

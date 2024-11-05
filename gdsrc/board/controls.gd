@@ -9,6 +9,8 @@ const DY: float = 2*Board.unit_height
 const DT: float = 1/60
 
 signal change_menu_visibility
+const ROTATE_DEPL_POINTER_SIGNAL = "rotate_deployment_pointer_signal"
+signal rotate_deployment_pointer_signal(player_name: String, unit_id: String, pos: Vector3, mouse_pos:Vector2)
 const DEPLOY_UNIT_SIGNAL = "deploy_unit"
 signal deploy_unit(player_name: String,unit_id: String,pos: Vector3)
 
@@ -20,14 +22,17 @@ const RESET_INTERVAL: float = 1000
 var delays: Dictionary = {}
 # flags
 var ctrl_pressed: bool = false
+var left_mouse_pressed: bool = false
 var menu_hidden: bool = false
 var deployment_zone_selected: bool = false
+var deployment_dir_selected: bool = false
 var dbutton_pressed: bool = false
 
 var current_player: String
 var current_unit: String
 
 var cursor_map_position: Vector3 = Vector3(0,0,0)
+var cursor_mouse_position: Vector2 = Vector2(0,0)
 
 # nodes
 var camera_node: Node
@@ -58,7 +63,6 @@ func project_cursor(event: InputEvent) -> Vector3:
 	 
 func walk_cursor(event) -> void:
 	var to = project_cursor(event)
-	print("Pos to ",to)
 	var grid_centers: Array = Global.ultra_mek_cpp.get_grid_centers()
 	if len(grid_centers)>0:
 		var to2: Vector2 = Vector2(to[0],to[2])
@@ -78,7 +82,6 @@ func walk_cursor(event) -> void:
 			pos = to
 		walk_light_node.set_global_position(pos)
 		cursor_map_position = pos
-		print("Pos pos ",pos)
 
 func keyboard_events(event: InputEventKey) -> void:
 	if event.get_keycode() == KEY_CTRL:
@@ -104,6 +107,11 @@ func keyboard_events(event: InputEventKey) -> void:
 		rotate_y(valy)
 
 func left_click_events(event: InputEvent)->void:
+	if event.is_pressed():
+		left_mouse_pressed = true
+	else:
+		left_mouse_pressed = false
+		
 	if Global.game_phase == Global.DEPLOYMENT_PHASE:
 		deployment_hud_control(event)
 
@@ -124,29 +132,41 @@ func deployment_hud_control(event: InputEvent) -> void:
 			)
 	
 	if dbutton_pressed == true:
-		if deployment_zone_selected == false and event.is_pressed():
-			dbutton_pressed = false
+		if deployment_zone_selected == false and deployment_dir_selected == false and event.is_pressed():			
 			deployment_zone_selected = true
+			cursor_mouse_position = event.global_position
+		elif deployment_zone_selected==true and deployment_dir_selected==true and not event.is_pressed():
+			dbutton_pressed = false
+			deployment_dir_selected = false
+			deployment_zone_selected = false
+			print("Deploy Go!")
 			deploy_unit.emit(current_player,current_unit,cursor_map_position)
 		else:
 			deployment_zone_selected = false
+			deployment_dir_selected = false
+			
 	
 	deployment_hud_node.connect(DeploymentHud.DEPLOYMENT_UNIT_CONFIRMED_SIGNAL,
 								_deployment_confirmed_button
 	)
 
+func deployment_hud_control_mouse_motion(event: InputEvent)->void:
+	if deployment_zone_selected == false:
+		walk_cursor(event)
 		
-		
-	print("deployment zone selected: ",deployment_zone_selected)
-
+	if (left_mouse_pressed == true and deployment_zone_selected == true
+	 and dbutton_pressed == true):
+		deployment_dir_selected=true
+		var rel_position = event.global_position - cursor_mouse_position
+		rotate_deployment_pointer_signal.emit(current_player,current_unit,cursor_map_position,rel_position)
+	
 func _input(event: InputEvent) -> void:
 	if event is InputEventWithModifiers:
 		if event is InputEventMouseMotion and ctrl_pressed == true:
 			rotate_x(event.relative.y*mouse_sense)
 			rotate_y(-event.relative.x*mouse_sense)
 		elif event is InputEventMouseMotion:
-			if deployment_zone_selected == false:
-				walk_cursor(event)
+			deployment_hud_control_mouse_motion(event)
 		elif event is InputEventMouseButton:
 			if event.get_button_index() == MOUSE_BUTTON_WHEEL_DOWN:
 				translate(Vector3(0,speed,0))

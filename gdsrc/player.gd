@@ -16,6 +16,7 @@ var forces_gfx_data: Dictionary = {}
 var figures: Dictionary = {}
 var player_name: String = ""
 var player_color: Color
+var pointers: Dictionary = {}
 
 func setup_player(name: String, data: Dictionary):
 	player_name = name
@@ -40,6 +41,22 @@ func add_figure(unit_id: String)->Node:
 	fig.set_name(get_figure_id(unit_id))
 	figures[unit_id] = fig
 	return fig
+	
+func add_pointer(unit_id: String)->UltraMekDirectionPointer:
+	var pointer : UltraMekDirectionPointer = UltraMekDirectionPointer.new()
+	var pointer_name: String = pointer.get_pointer_name(player_name,unit_id)
+	pointer.set_name(pointer_name)
+	pointers[unit_id] = pointer
+	return pointer
+
+func pointer_exists(unit_id: String)-> bool:
+	return unit_id in pointers.keys()
+
+func get_pointer(unit_id: String)->UltraMekDirectionPointer:
+	if pointer_exists(unit_id):
+		return pointers[unit_id]
+	else:
+		return null
 
 func get_player_name()->String:
 	return player_name

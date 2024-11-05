@@ -110,7 +110,6 @@ func _process_routine(delta: float) -> void:
 		await main_node.connect("request_players_signal",start_requesting_players)
 		if main_node.players_recieved == false:
 			await request_players(players)
-		
 	
 func _handle_client_data(data: PackedByteArray) -> bool:
 	#print("Client data 2 : ", data.get_string_from_utf8())
