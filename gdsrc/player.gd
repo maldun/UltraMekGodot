@@ -49,6 +49,12 @@ func add_pointer(unit_id: String)->UltraMekDirectionPointer:
 	pointers[unit_id] = pointer
 	return pointer
 
+func remove_pointer(unit_id: String)->void:
+	if pointer_exists(unit_id) == true:
+		var pointer : UltraMekDirectionPointer = pointers[unit_id]
+		pointer.queue_free()
+		pointers.erase(unit_id)
+
 func pointer_exists(unit_id: String)-> bool:
 	return unit_id in pointers.keys()
 

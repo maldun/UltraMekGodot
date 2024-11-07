@@ -3,11 +3,17 @@ extends Control
 
 const DEPLOYMENT_HUD_NODE: String = "DeploymentHud"
 const DEPLOYMENT_BUTTON_NODE: String = "DeploymentButtons"
+const CONTAINER_NAME: String = "CenterContainer"
+const DEPLOYMENT_BILLBOARD: String = "res://assets/menu/deployment_phase_billboard.png"
 const DEPLOYMENT_LOGO: String = "res://assets/menu/deploy.png"
 const DEPLOYMENT_CONFIRM_BUTTON_NAME: String = "confirm_button"
 const CURR_PLAYER_KEY: String = "curr_player"
 const CURR_UNIT_KEY: String = "curr_unit"
 const CURR_MAP_POS: String = "current_map_pos"
+
+const TIMEOUT: float = 3
+
+var init_timer: float = -1
 
 var preparation_hud: Node
 var deployment_buttons: Node
@@ -19,6 +25,7 @@ var active_deployment_buttons: Array = []
 var current_unit = {}
 
 var main_node: Node = null
+var billboard_node: TextureRect = null
 
 const DEPLOYMENT_BUTTON_PRESSED_SIGNAL = "deployment_button_pressed"
 signal deployment_button_pressed(player_name: String, button_id: String)
@@ -37,10 +44,22 @@ func _ready() -> void:
 	main_node = get_parent()
 	deployment_buttons = _ready_up_node(DEPLOYMENT_BUTTON_NODE)
 	current_phase = Global.game_phase
+	_make_start_screen()
 	deployment_buttons_dict = {}
 	await _make_hud_visible(deployment_buttons,"Deployment Hud visible!")
 	await _setup_deployment_hud()
-		
+
+func _make_start_screen()->void:
+	init_timer = 0
+	var container: Node = find_child(CONTAINER_NAME,true,false)
+	var billboard: TextureRect = TextureRect.new()
+	var texture = _load_texture_from_extern(DEPLOYMENT_BILLBOARD)
+	billboard.set_texture(texture)
+	#billboard.set_expand_mode(TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL)
+	billboard.set_stretch_mode(TextureRect.StretchMode.STRETCH_KEEP_ASPECT_CENTERED)
+	container.add_child(billboard)
+	billboard_node = billboard
+
 func _make_hud_invisible(hud_node:Node,msg: String="invisible") -> void:
 	if hud_node != null:
 		hud_node.visible = false
@@ -175,9 +194,20 @@ func _deployment_button_press(delta: float)->void:
 			current_unit = {}
 			deployment_buttons_dict[curr_player][curr_unit].disabled=true
 
+func _billboard_phase_out(delta: float)->void:
+	if init_timer >= 0:
+		if init_timer < TIMEOUT:
+			init_timer += delta
+		else:
+			if billboard_node != null:
+				var container: Node = find_child(CONTAINER_NAME,true,false)
+				container.remove_child(billboard_node)
+			init_timer = -1
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	_check_phase(delta)
+	_billboard_phase_out(delta)
 	_add_entity_buttons_for_player(delta)
 	_check_button_pressed(delta)
 	_deployment_button_activate(delta)

@@ -11,6 +11,8 @@ const DT: float = 1/60
 signal change_menu_visibility
 const ROTATE_DEPL_POINTER_SIGNAL = "rotate_deployment_pointer_signal"
 signal rotate_deployment_pointer_signal(player_name: String, unit_id: String, pos: Vector3, mouse_pos:Vector2)
+const REMOVE_POINTER_SIGNAL: String = "remove_pointer_signal"
+signal remove_pointer_signal(player_name: String, unit_id: String)
 const DEPLOY_UNIT_SIGNAL = "deploy_unit"
 signal deploy_unit(player_name: String,unit_id: String,pos: Vector3)
 
@@ -139,7 +141,6 @@ func deployment_hud_control(event: InputEvent) -> void:
 			dbutton_pressed = false
 			deployment_dir_selected = false
 			deployment_zone_selected = false
-			print("Deploy Go!")
 			deploy_unit.emit(current_player,current_unit,cursor_map_position)
 		else:
 			deployment_zone_selected = false
@@ -159,14 +160,29 @@ func deployment_hud_control_mouse_motion(event: InputEvent)->void:
 		deployment_dir_selected=true
 		var rel_position = event.global_position - cursor_mouse_position
 		rotate_deployment_pointer_signal.emit(current_player,current_unit,cursor_map_position,rel_position)
-	
+
+func _mouse_motion_events(event: InputEventMouseMotion)-> void:
+	if Global.game_phase == Global.DEPLOYMENT_PHASE:
+		deployment_hud_control_mouse_motion(event)
+
+func _deployment_hud_control_right_click(event: InputEventMouseButton):
+	if event.is_pressed() and dbutton_pressed == true:
+		deployment_dir_selected = false
+		deployment_zone_selected = false
+		left_mouse_pressed = false
+		dbutton_pressed = false
+		remove_pointer_signal.emit(current_player,current_unit)
+
+func _right_click_events(event: InputEventMouseButton):
+	if Global.game_phase == Global.DEPLOYMENT_PHASE:
+		_deployment_hud_control_right_click(event)
 func _input(event: InputEvent) -> void:
 	if event is InputEventWithModifiers:
 		if event is InputEventMouseMotion and ctrl_pressed == true:
 			rotate_x(event.relative.y*mouse_sense)
 			rotate_y(-event.relative.x*mouse_sense)
 		elif event is InputEventMouseMotion:
-			deployment_hud_control_mouse_motion(event)
+			_mouse_motion_events(event)
 		elif event is InputEventMouseButton:
 			if event.get_button_index() == MOUSE_BUTTON_WHEEL_DOWN:
 				translate(Vector3(0,speed,0))
@@ -174,6 +190,8 @@ func _input(event: InputEvent) -> void:
 				translate(Vector3(0,-speed,0))
 			if event.get_button_index() == MOUSE_BUTTON_LEFT:
 				left_click_events(event)
+			if event.get_button_index() == MOUSE_BUTTON_RIGHT:
+				_right_click_events(event)
 		elif event is InputEventKey:
 			keyboard_events(event)
 		else:

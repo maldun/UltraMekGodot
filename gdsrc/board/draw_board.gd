@@ -199,16 +199,22 @@ func _rotate_deployment_pointer(player_name: String, unit_id: String, pos: Vecto
 		
 	
 	var phi: Global.DIRECTIONS = pointer.compute_dir_from_mouse_position(mouse_pos)
-	print("rotate pointer!",mouse_pos,phi)
+	#print("rotate pointer!",mouse_pos,phi,"atan2: ",atan2(mouse_pos[0],mouse_pos[1]))
 	pointer.rotate_pointer(phi)
 	
-
 func _deploy_unit(player_name: String, unit_id: String, pos: Vector3):
 	var fig: Node = Global.players[player_name].add_figure(unit_id)
 	add_child(fig)
 	fig.set_global_position(pos)
 	fig.deploy(player_name,unit_id,pos)
-	
+
+func _remove_pointer(player_name: String, unit_id: String):
+	var player: Player = Global.players[player_name]
+	var pointer: UltraMekDirectionPointer = null
+	if player.pointer_exists(unit_id):
+		pointer = player.get_pointer(unit_id)
+		remove_child(pointer)
+		player.remove_pointer(unit_id)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -222,6 +228,7 @@ func _process(delta: float) -> void:
 		
 	if Global.controls != null:
 		Global.controls.connect(UltraMekControls.ROTATE_DEPL_POINTER_SIGNAL,_rotate_deployment_pointer)
+		Global.controls.connect(UltraMekControls.REMOVE_POINTER_SIGNAL,_remove_pointer)
 		
 	if Global.main != null:
 		Global.main.connect(UltraMekMain.DEPLOY_UNIT_SIGNAL,_deploy_unit)

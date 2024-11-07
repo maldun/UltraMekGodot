@@ -1,5 +1,16 @@
 # UltraMekGodot
 
+## Atrributions
+
+UltraMekGodot uses the following sources, which need attribution according to license:
+
+### Sounds
+
+- Dice Roll Pack (dice-shuffling, dice-rolls-D6) from user aalorv (free sounds.org accessed on 06.10.2024): 
+  dice-shuffling by aalorv -- https://freesound.org/s/744989/ -- License: Attribution 4.0
+  dice-rolls-D6 by aalorv -- https://freesound.org/s/744988/ -- License: Attribution 4.0
+
+
 ## License
 UltraMekGodot is a game implementd in Godot/C++/Python (compatible with MegaMek)
 

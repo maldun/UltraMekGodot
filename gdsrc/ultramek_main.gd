@@ -116,7 +116,9 @@ func _game_start_process(delta: float)->void:
 		await Global.connect("processed_board_data",_collect_board_data)
 		game_client.connect("recieved_player_data",_collect_player_data)
 		if _check_game_ready(delta) == true:
+			Global.round_nr = 0
 			Global.game_phase = Global.DEPLOYMENT_PHASE
+			#Global.game_phase = Global.INITIATIVE_PHASE
 
 func _collect_board_data(dim_x:int,dim_y:int)->void:
 	print("Alert: Board data recieved!")
@@ -146,7 +148,6 @@ func _set_new_game_info(board: String,forces: Dictionary, settings: Dictionary):
 	game_settings_set = true
 
 func _deploy_unit(player_name: String, unit_id: String, pos: Vector3):
-	print("unit deployed: ", player_name,unit_id,pos)
 	deploy_unit_signal.emit(player_name, unit_id,pos)
 
 func _deployment_process(delta: float)->void:
@@ -180,6 +181,7 @@ func _setup_sound():
 func _set_states() -> void:
 	Global.game_phase = Global.PREPARATION_PHASE
 	current_game_phase = Global.game_phase
+	Global.round_nr = -1
 	board_recieved = false
 	players_recieved = false
 

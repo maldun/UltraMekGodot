@@ -9,12 +9,16 @@ var game_metadata: Dictionary = {}
 
 # Phases
 const PREPARATION_PHASE: String = "__PREPARATION__PHASE__"
+const INITIATIVE_PHASE: String = "__INITIATIVE__PHASE__"
 const DEPLOYMENT_PHASE: String = "__DEPLOYMENT__PHASE__"
-const MOVEMENT_PHASE: String = "__MOVEMENT__PAHSE__"
-const ATTACK_PHASE: String = "__ATTACK_PHASE__"
-const DAMAGE_PHASE: String = "__DAMAGE_PHASE__"
+const MOVEMENT_PHASE: String = "__MOVEMENT__PHASE__"
+const ATTACK_PHASE: String = "__ATTACK__PHASE__"
+const DAMAGE_PHASE: String = "__DAMAGE__PHASE__"
 
 signal processed_board_data(dim_x: int, dim_y: int)
+
+# round counter
+var round_nr: int = -1
 
 # Directions
 enum DIRECTIONS {SE,S,SW,NW,N,NE}
