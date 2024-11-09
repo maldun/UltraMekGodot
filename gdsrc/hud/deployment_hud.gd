@@ -27,14 +27,17 @@ var current_unit = {}
 var main_node: Node = null
 var billboard_node: TextureRect = null
 
+var billboard_phased_out: bool = false
+var hud_setup: bool = false
+
 const DEPLOYMENT_BUTTON_PRESSED_SIGNAL = "deployment_button_pressed"
 signal deployment_button_pressed(player_name: String, button_id: String)
 
 const DEPLOYMENT_UNIT_CONFIRMED_SIGNAL = "deploy_unit_confirmed"
 signal deploy_unit_confirmed(player_name: String,unit_id: String,unit_pos: Vector3)
 
-func _ready_up_node(name: String) -> Node:
-	var node: Node = find_child(name,true,false)
+func _ready_up_node(node_name: String) -> Node:
+	var node: Node = find_child(node_name,true,false)
 	if node != null:
 		node.visible = true
 	return node
@@ -46,7 +49,7 @@ func _ready() -> void:
 	current_phase = Global.game_phase
 	_make_start_screen()
 	deployment_buttons_dict = {}
-	await _make_hud_visible(deployment_buttons,"Deployment Hud visible!")
+	await _make_hud_invisible(deployment_buttons,"Deployment Hud invisible!")
 	await _setup_deployment_hud()
 
 func _make_start_screen()->void:
@@ -110,11 +113,11 @@ func _setup_deployment_hud()->void:
 				var entity: Dictionary = player_picture_data[entity_key]
 				#var entity: Dictionary = player_picture_data["1"]
 				print("Player Picture Data: ",entity["gfx_2d_image"])
-				var button: Button = _setup_entity_button(entity)
+				var button: Button = _setup_entity_button(entity_key,entity)
 				deployment_buttons_dict[player_id][entity_key]=button
 				
 		
-func _setup_entity_button(entity: Dictionary)->Button:
+func _setup_entity_button(entity_key: String, entity: Dictionary)->Button:
 	var entity_button: Button = Button.new()
 	var picture: String = entity["gfx_2d_image"]
 	#var texture = load("res://" + picture)
@@ -122,8 +125,8 @@ func _setup_entity_button(entity: Dictionary)->Button:
 	var texture = UltraMekTools.color_up(picture,player_color)
 	
 	entity_button.icon = texture
-	#entity_button.disabled=true
-	entity_button.name = "1"
+	#entity_button.disabled=false
+	entity_button.name = entity_key
 	entity_button.visible = true
 	var min_size: Vector2 = entity_button.get_minimum_size()
 	entity_button.custom_minimum_size = min_size*1.5
@@ -202,6 +205,11 @@ func _billboard_phase_out(delta: float)->void:
 			if billboard_node != null:
 				var container: Node = find_child(CONTAINER_NAME,true,false)
 				container.remove_child(billboard_node)
+				container.visible = false
+				billboard_phased_out=true
+			if billboard_phased_out==true and hud_setup==false:
+				_make_hud_visible(deployment_buttons,"buttons visible!")
+				hud_setup = true
 			init_timer = -1
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

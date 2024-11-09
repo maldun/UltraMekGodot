@@ -8,6 +8,9 @@ signal request_players_signal(forces: Dictionary)
 signal deploy_unit_signal(player_name: String, unit_id: String,pos: Vector3)
 const DEPLOY_UNIT_SIGNAL: String = "deploy_unit_signal"
 
+signal play_phase_start_sound_signal
+const PLAY_PHASE_START_SOUND_SIGNAL: String = "play_phase_start_sound_signal"
+
 const NODE_NAME: String = "Main"
 const DEFAULT_HOST: String = "127.0.0.1"
 const DEFAULT_PORT: int = 8563
@@ -198,7 +201,8 @@ func _set_mouse():
 	
 func _setup_hud(delta: float) -> void:
 	_setup_deployment_hud(delta)
-	
+
+
 func _setup_deployment_hud(delta: float)->void:
 	if Global.game_phase == Global.DEPLOYMENT_PHASE and deployment_hud_node == null:
 		var deployment_scene = preload(DEPLOYMENT_HUD_SCENE)
@@ -206,6 +210,7 @@ func _setup_deployment_hud(delta: float)->void:
 		deployment_hud_node.set_name(DEPLOYMENT_HUD_NAME)
 		self.add_child(deployment_hud_node)
 		deployment_hud_node.visible = true
+		play_phase_start_sound_signal.emit()
 	elif Global.game_phase != Global.DEPLOYMENT_PHASE and deployment_hud_node != null:
 		remove_child(deployment_hud_node)
 		deployment_hud_node.queue_free()
