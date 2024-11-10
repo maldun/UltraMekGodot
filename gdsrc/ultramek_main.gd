@@ -52,6 +52,7 @@ var board_recieved: bool = false
 var players_recieved: bool = false
 var game_settings_set: bool = false
 var game_set_up: bool = false
+var roll_result_recieved: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

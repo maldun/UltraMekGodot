@@ -10,6 +10,8 @@ const NONE_ANSWER: String = "Nothing!"
 const RQ: String = "REQUEST_TYPE"
 const MAP_RQ: String = "BOARD_REQUEST"
 const PLA_RQ: String = "PLAYER_REQUEST"
+const ROL_RQ: String = "ROLL_REQUEST"
+const STA_RQ: String = "STATUS_REQUEST"
 const FILENAME: String = 'filename'
 
 const RECIEVED_BOARD_SIGNAL = "recieved_board"
@@ -22,9 +24,11 @@ signal recieved_player_data(deployment_json)
 #var _client: Client = Client.new()
 var _client: UltraMekTCPClient # = UltraMekTCPClient.new()
 var board_requested: bool = false
-var deployment_requested: bool = false
+var player_requested: bool = false
+var roll_requested: bool = false
 var board_fname: String = ""
 var players: Dictionary = {}
+var rolls: Dictionary = {}
 var _connect_tcp: bool = false
 var main_node: Node = null
 
@@ -42,7 +46,7 @@ func _ready() -> void:
 	#_client.connect("data", _print_server_data)
 	add_child(_client)
 	board_requested = false
-	deployment_requested = false
+	player_requested = false
 	_connect_tcp = false
 	main_node = get_parent()
 
@@ -73,6 +77,19 @@ func request_board(fname: String) -> void:
 			board_fname = ''
 	
 	#return answer
+
+func _requesting(request_dic: Dictionary,
+	  request_flag: bool, request_type:String):
+	var answer: String = NONE_ANSWER
+	print("Sent: ", request_dic)
+	if request_flag == true:
+		var request: String = await _request_dict(players,request_type)
+		var message: PackedByteArray = await request.to_utf8_buffer() 
+		await _client.connect_to_host(HOST, PORT)
+		await _handle_client_data(message)
+		answer = await _client.recieve()
+		var answer_dict = JSON.parse_string(answer)
+		return answer_dict
 	
 func start_requesting_board(fname: String):
 	board_requested = true
@@ -80,24 +97,21 @@ func start_requesting_board(fname: String):
 	#print("Sent board 1: ", board_requested, board_fname)
 
 func request_players(players: Dictionary):
-	var answer: String = NONE_ANSWER
-	print("Sent: ", players)
-	if deployment_requested == true:
-		var request: String = await _request_dict(players,PLA_RQ)
-		var message: PackedByteArray = await request.to_utf8_buffer() 
-		await _client.connect_to_host(HOST, PORT)
-		await _handle_client_data(message)
-		answer = await _client.recieve()
-		var answer_dict = JSON.parse_string(answer)
-		if answer_dict != null:
-			var recieved_players = answer_dict[PLA_RQ] 
-			print("Answer (Players): ", recieved_players)
-			recieved_player_data.emit(recieved_players)
-			deployment_requested = false
+	var answer_dict = await _requesting(players,player_requested,PLA_RQ)
+	if answer_dict != null:
+		var recieved_players = answer_dict[PLA_RQ] 
+		print("Answer (Players): ", recieved_players)
+		recieved_player_data.emit(recieved_players)
+		player_requested = false
 
 func start_requesting_players(players_rec: Dictionary):
-	deployment_requested = true
+	player_requested = true
 	players = players_rec
+	print("Alert: Forces: ",players)
+
+func start_requesting_roll(roll_request: Dictionary):
+	roll_requested = true
+	rolls = roll_request
 	print("Alert: Forces: ",players)
 
 func _process_routine(delta: float) -> void:
