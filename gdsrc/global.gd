@@ -1,9 +1,10 @@
 extends Node
 
 # Keys
-const _SETTINGS_KEY: String = "settings"
-const _FORCES_KEY: String = "forces"
-const _BOARD_KEY: String = "board"
+const SETTINGS_KEY: String = "settings"
+const FORCES_KEY: String = "forces"
+const BOARD_KEY: String = "board"
+const PLAYER_KEY: String = "player"
 
 var game_metadata: Dictionary = {}
 
@@ -41,6 +42,8 @@ var game_client: Node = null
 var controls: Node = null
 var sound: Node = null
 var board: Node = null
+
+const mecha_font: FontFile = preload("res://assets/fonts/mechaside/Mechaside-Regular.ttf")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

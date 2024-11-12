@@ -18,6 +18,11 @@ static func color_up(image_fname: String,player_color: Color)->ImageTexture:
 	var new_texture = ImageTexture.create_from_image(image)
 	return new_texture
 
+static func load_texture_from_extern(fname: String)-> ImageTexture:
+	var image = Image.load_from_file(fname)
+	var texture = ImageTexture.create_from_image(image)
+	return texture
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.

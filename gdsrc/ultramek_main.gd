@@ -2,14 +2,21 @@ class_name UltraMekMain
 extends Node
 
 signal connect_tcp_server_main
+
+const REQUEST_BOARD_SIGNAL: String = "request_board_signal"
 signal request_board_signal(fname: String)
+
+const REQUEST_PLAYERS_SIGNAL: String = "request_players_signal"
 signal request_players_signal(forces: Dictionary)
 
-signal deploy_unit_signal(player_name: String, unit_id: String,pos: Vector3)
-const DEPLOY_UNIT_SIGNAL: String = "deploy_unit_signal"
+const REQUEST_INITIATIVE_SIGNAL: String = "request_initiative_signal"
+signal request_initiative_signal(data: Dictionary)
 
-signal play_phase_start_sound_signal
+const DEPLOY_UNIT_SIGNAL: String = "deploy_unit_signal"
+signal deploy_unit_signal(player_name: String, unit_id: String,pos: Vector3)
+
 const PLAY_PHASE_START_SOUND_SIGNAL: String = "play_phase_start_sound_signal"
+signal play_phase_start_sound_signal
 
 const NODE_NAME: String = "Main"
 const DEFAULT_HOST: String = "127.0.0.1"
@@ -21,6 +28,7 @@ const TCP_NODE_NAME: String = "TCPClient"
 const BOARD3D_NODE_NAME: String = "Board3D"
 const HUD_NODE_NAME: String = "HUD"
 const DEPLOYMENT_HUD_SCENE: String = "res://gdsrc/hud/deployment_hud.tscn"
+const INITIATIVE_HUD_SCENE: String = "res://gdsrc/hud/initiative_hud.tscn"
 
 const BOARD3D_SCENE = preload("res://gdsrc/board/board3d.tscn")
 
@@ -31,6 +39,7 @@ const SETTING_FILE: String = "res://settings.json"
 const GAME_SETTINGS_KEY: String = "game_settings"
 const BOARD_KEY: String = "board"
 const PLAYER_KEY: String = "players"
+const INITIATIVE_HUD_NAME: String = "InitiativeHud"
 const DEPLOYMENT_HUD_NAME: String = "DeploymentHud"
 
 var game_client: UltraMekClient = null
@@ -42,6 +51,8 @@ var main_menu_node: Node
 var connect_server_button: Node 
 var new_game_button: Node
 
+# hud nodes
+var initiative_hud_node: Node
 var deployment_hud_node: Node
 
 # flags
@@ -52,7 +63,7 @@ var board_recieved: bool = false
 var players_recieved: bool = false
 var game_settings_set: bool = false
 var game_set_up: bool = false
-var roll_result_recieved: bool = false
+var initiative_recieved: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -121,8 +132,8 @@ func _game_start_process(delta: float)->void:
 		game_client.connect("recieved_player_data",_collect_player_data)
 		if _check_game_ready(delta) == true:
 			Global.round_nr = 0
-			Global.game_phase = Global.DEPLOYMENT_PHASE
-			#Global.game_phase = Global.INITIATIVE_PHASE
+			#Global.game_phase = Global.DEPLOYMENT_PHASE
+			Global.game_phase = Global.INITIATIVE_PHASE
 
 func _collect_board_data(dim_x:int,dim_y:int)->void:
 	print("Alert: Board data recieved!")
@@ -146,9 +157,9 @@ func _collect_player_data(player_data: Dictionary)->void:
 	Global.active_player = Global.players["player1"]
 	
 func _set_new_game_info(board: String,forces: Dictionary, settings: Dictionary):
-	Global.game_metadata[Global._BOARD_KEY] = board
-	Global.game_metadata[Global._FORCES_KEY] = forces
-	Global.game_metadata[Global._SETTINGS_KEY] = settings
+	Global.game_metadata[Global.BOARD_KEY] = board
+	Global.game_metadata[Global.FORCES_KEY] = forces
+	Global.game_metadata[Global.SETTINGS_KEY] = settings
 	game_settings_set = true
 
 func _deploy_unit(player_name: String, unit_id: String, pos: Vector3):
@@ -159,12 +170,22 @@ func _deployment_process(delta: float)->void:
 		deployment_hud_node.connect(DeploymentHud.DEPLOYMENT_UNIT_CONFIRMED_SIGNAL,
 		_deploy_unit)
 
+func _roll_initiative(player_name: String):
+	var initiative_data: Dictionary = {Global.PLAYER_KEY:player_name}
+	request_initiative_signal.emit(initiative_data)
+	Global.sound.play_dice_sound()
+	
+func _initiative_process()->void:
+	if initiative_hud_node != null:
+		initiative_hud_node.connect(InitiativeHud.INIT_BUTTON_PRESSED_SIGNAL,_roll_initiative)
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	_server_process(delta)
 	if game_client != null:
 		_game_start_process(delta)
 		_setup_hud(delta)
+		_initiative_process()
 		_deployment_process(delta)
 		
 		
@@ -202,21 +223,34 @@ func _set_mouse():
 	
 func _setup_hud(delta: float) -> void:
 	_setup_deployment_hud(delta)
-
+	_setup_initiative_hud(delta)
+	
+func _setup_initiative_hud(delta: float) -> void:
+	if Global.game_phase == Global.INITIATIVE_PHASE and initiative_hud_node == null:
+		initiative_hud_node = _instantiate_phase_hud(INITIATIVE_HUD_SCENE,INITIATIVE_HUD_NAME)
+	elif Global.game_phase != Global.INITIATIVE_PHASE and initiative_hud_node != null:
+		_remove_phase_hud(initiative_hud_node)
 
 func _setup_deployment_hud(delta: float)->void:
 	if Global.game_phase == Global.DEPLOYMENT_PHASE and deployment_hud_node == null:
-		var deployment_scene = preload(DEPLOYMENT_HUD_SCENE)
-		deployment_hud_node = deployment_scene.instantiate()
-		deployment_hud_node.set_name(DEPLOYMENT_HUD_NAME)
-		self.add_child(deployment_hud_node)
-		deployment_hud_node.visible = true
-		play_phase_start_sound_signal.emit()
+		deployment_hud_node = _instantiate_phase_hud(DEPLOYMENT_HUD_SCENE,DEPLOYMENT_HUD_NAME)
 	elif Global.game_phase != Global.DEPLOYMENT_PHASE and deployment_hud_node != null:
-		remove_child(deployment_hud_node)
-		deployment_hud_node.queue_free()
+		_remove_phase_hud(deployment_hud_node)
 
-	
+func _instantiate_phase_hud(scene_file,scene_name) -> Node:
+	var result: Node = null
+	var hud_scene = load(scene_file)
+	result = hud_scene.instantiate()
+	result.set_name(scene_name)
+	add_child(result)
+	result.visible=true
+	play_phase_start_sound_signal.emit()
+	return result
+
+func _remove_phase_hud(phase_hud_node)->void:
+	remove_child(phase_hud_node)
+	phase_hud_node.queue_free()
+
 func _setup_buttons():
 	main_menu_node = find_child(MAIN_MENU_NODE_NAME,true,false)
 	connect_server_button = find_child(CONNECT_SERVER_BUTTON,true,false)

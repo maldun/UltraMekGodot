@@ -10,25 +10,35 @@ const NONE_ANSWER: String = "Nothing!"
 const RQ: String = "REQUEST_TYPE"
 const MAP_RQ: String = "BOARD_REQUEST"
 const PLA_RQ: String = "PLAYER_REQUEST"
-const ROL_RQ: String = "ROLL_REQUEST"
+const ACT_RQ: String = "ACTION_REQUEST"
 const STA_RQ: String = "STATUS_REQUEST"
+const INI_RQ: String = "INITIATIVE_REQUEST"
 const FILENAME: String = 'filename'
 
+# signals
 const RECIEVED_BOARD_SIGNAL = "recieved_board"
-const RECIEVED_PLAYER_SIGNAL = "recieved_player_data"
-
 signal recieved_board(board_json)
+
+const RECIEVED_PLAYER_SIGNAL = "recieved_player_data"
 signal recieved_player_data(deployment_json)
+
+const RECIEVED_ACTION_SIGNAL: String = "recieved_action_data"
+signal recieved_action_data(action_json: Dictionary)
+
+const RECIEVED_INITIATIVE_SIGNAL: String = "recieved_initiative_data"
+signal recieved_initiative_data(initiative_json: Dictionary)
 
 #const Client = preload("res://tcp_client.gd")
 #var _client: Client = Client.new()
 var _client: UltraMekTCPClient # = UltraMekTCPClient.new()
 var board_requested: bool = false
 var player_requested: bool = false
-var roll_requested: bool = false
+var action_requested: bool = false
+var initiative_requested: bool = false
 var board_fname: String = ""
 var players: Dictionary = {}
-var rolls: Dictionary = {}
+var actions: Dictionary = {}
+var initiative: Dictionary = {}
 var _connect_tcp: bool = false
 var main_node: Node = null
 
@@ -109,22 +119,48 @@ func start_requesting_players(players_rec: Dictionary):
 	players = players_rec
 	print("Alert: Forces: ",players)
 
-func start_requesting_roll(roll_request: Dictionary):
-	roll_requested = true
-	rolls = roll_request
-	print("Alert: Forces: ",players)
+func request_action(actions: Dictionary):
+	var answer_dict = await _requesting(actions,action_requested,ACT_RQ)
+	if answer_dict != null:
+		var recieved_result = answer_dict[ACT_RQ]
+		print("Answer (Action): ",recieved_result)
+		recieved_action_data.emit(recieved_result)
+		action_requested=false
+
+func start_requesting_action(action_request: Dictionary):
+	action_requested = true
+	actions = action_request
+	print("Alert: action: ",actions)
+
+func request_initiative(initiative: Dictionary):
+	var answer_dict = await _requesting(initiative,initiative_requested,INI_RQ)
+	if answer_dict != null:
+		var recieved_result = answer_dict[INI_RQ]
+		print("Answer (Initiative): ",recieved_result)
+		recieved_initiative_data.emit(recieved_result)
+		initiative_requested=false
+
+func start_requesting_initiative(initiative_request: Dictionary):
+	initiative_requested = true
+	initiative = initiative_request
+	print("Alert: Initiative: ",initiative)
+
 
 func _process_routine(delta: float) -> void:
 	#var fname: String = "test/samples/snow.board"
 	if main_node != null:
-		await main_node.connect("request_board_signal",start_requesting_board)
+		await main_node.connect(UltraMekMain.REQUEST_BOARD_SIGNAL,start_requesting_board)
 		if main_node.board_recieved == false:
 			await request_board(board_fname)
 		
-		await main_node.connect("request_players_signal",start_requesting_players)
+		await main_node.connect(UltraMekMain.REQUEST_PLAYERS_SIGNAL,start_requesting_players)
 		if main_node.players_recieved == false:
 			await request_players(players)
-	
+			
+		await main_node.connect(UltraMekMain.REQUEST_INITIATIVE_SIGNAL,start_requesting_initiative)
+		if 	main_node.initiative_recieved == false:
+			await request_initiative(initiative)
+			
 func _handle_client_data(data: PackedByteArray) -> bool:
 	#print("Client data 2 : ", data.get_string_from_utf8())
 	var message: PackedByteArray = data

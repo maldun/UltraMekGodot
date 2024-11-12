@@ -56,7 +56,7 @@ func _make_start_screen()->void:
 	init_timer = 0
 	var container: Node = find_child(CONTAINER_NAME,true,false)
 	var billboard: TextureRect = TextureRect.new()
-	var texture = _load_texture_from_extern(DEPLOYMENT_BILLBOARD)
+	var texture = UltraMekTools.load_texture_from_extern(DEPLOYMENT_BILLBOARD)
 	billboard.set_texture(texture)
 	#billboard.set_expand_mode(TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL)
 	billboard.set_stretch_mode(TextureRect.StretchMode.STRETCH_KEEP_ASPECT_CENTERED)
@@ -75,10 +75,10 @@ func _make_hud_visible(hud_node:Node,msg: String="visible") -> void:
 		if msg != "":
 			print('Hud Event: ',msg)
 
-func _load_texture_from_extern(fname: String)-> ImageTexture:
-	var image = Image.load_from_file(fname)
-	var texture = ImageTexture.create_from_image(image)
-	return texture
+#func _load_texture_from_extern(fname: String)-> ImageTexture:
+	#var image = Image.load_from_file(fname)
+	#var texture = ImageTexture.create_from_image(image)
+	#return texture
 
 func to_grey_scale(image_fname: String)->ImageTexture:
 	#var image: Image = Image.new()
