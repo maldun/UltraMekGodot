@@ -64,6 +64,7 @@ var players_recieved: bool = false
 var game_settings_set: bool = false
 var game_set_up: bool = false
 var initiative_recieved: bool = false
+var hotseat: bool = true
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -131,9 +132,18 @@ func _game_start_process(delta: float)->void:
 		await Global.connect("processed_board_data",_collect_board_data)
 		game_client.connect("recieved_player_data",_collect_player_data)
 		if _check_game_ready(delta) == true:
-			Global.round_nr = 0
+			_setup_session()
 			#Global.game_phase = Global.DEPLOYMENT_PHASE
 			Global.game_phase = Global.INITIATIVE_PHASE
+			
+
+func _setup_session()->void:
+	Global.round_nr = 0
+	Global.player_order = []
+	for p in Global.players.keys():
+		Global.player_order.append(p)
+	Global.active_player = Global.players[Global.player_order[0]]
+	
 
 func _collect_board_data(dim_x:int,dim_y:int)->void:
 	print("Alert: Board data recieved!")
@@ -146,7 +156,6 @@ func _check_game_ready(delta: float)->bool:
 	else:
 		return false
 
-
 func _collect_player_data(player_data: Dictionary)->void:
 	for name in player_data.keys():
 		var player: Player = Player.new()
@@ -154,7 +163,6 @@ func _collect_player_data(player_data: Dictionary)->void:
 		Global.players[name] = player
 		print("Added Player: ",player.get_player_name())
 	players_recieved = true
-	Global.active_player = Global.players["player1"]
 	
 func _set_new_game_info(board: String,forces: Dictionary, settings: Dictionary):
 	Global.game_metadata[Global.BOARD_KEY] = board
@@ -172,7 +180,7 @@ func _deployment_process(delta: float)->void:
 
 func _roll_initiative(player_name: String):
 	var initiative_data: Dictionary = {Global.PLAYER_KEY:player_name}
-	request_initiative_signal.emit(initiative_data)
+	#request_initiative_signal.emit(initiative_data)
 	Global.sound.play_dice_sound()
 	
 func _initiative_process()->void:
@@ -193,11 +201,15 @@ func _process(delta: float) -> void:
 	print("Alert: Game Phase: ",Global.game_phase)
 	
 func _setup_game():
+	_apply_game_settings()
 	_setup_buttons()
 	_set_mouse()
 	_set_states()
 	_setup_sound()
-	
+
+func _apply_game_settings() -> void:
+	pass
+
 func _setup_sound():
 	Global.sound = UltraMekSound.new()
 	Global.sound.set_name(SOUND_NODE_NAME)

@@ -93,7 +93,7 @@ func _requesting(request_dic: Dictionary,
 	var answer: String = NONE_ANSWER
 	print("Sent: ", request_dic)
 	if request_flag == true:
-		var request: String = await _request_dict(players,request_type)
+		var request: String = await _request_dict(request_dic,request_type)
 		var message: PackedByteArray = await request.to_utf8_buffer() 
 		await _client.connect_to_host(HOST, PORT)
 		await _handle_client_data(message)
@@ -135,6 +135,7 @@ func start_requesting_action(action_request: Dictionary):
 func request_initiative(initiative: Dictionary):
 	var answer_dict = await _requesting(initiative,initiative_requested,INI_RQ)
 	if answer_dict != null:
+		print("Answer Dict: ", answer_dict)
 		var recieved_result = answer_dict[INI_RQ]
 		print("Answer (Initiative): ",recieved_result)
 		recieved_initiative_data.emit(recieved_result)
@@ -175,7 +176,7 @@ func _request_map_file(filename: String) -> String:
 		
 func _request_dict(req: Dictionary,request_type: String)-> String:
 	var rdict: Dictionary = {}
-	rdict[request_type] = players
+	rdict[request_type] = req #players
 	var output: String = JSON.stringify(rdict) + '\n'
 	return output
 	

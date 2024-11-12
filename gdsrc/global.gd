@@ -31,6 +31,7 @@ var board_data: Dictionary = {}
 var ultra_mek_cpp: UltraMekGD = UltraMekGD.new()
 var players: Dictionary = {}
 var active_player: Player = null
+var player_order: Array[String] = []
 
 # Geometry
 const UNIT_LENGTH: float = 1.0
@@ -53,3 +54,14 @@ func _ready() -> void:
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
+	
+func next_player()->void:
+	var active_name: String = active_player.get_player_name()
+	var lp: int = len(player_order)
+	for k in range(lp):
+		if player_order[k] == active_name:
+			var ind: int = (k+1)%lp
+			active_player = players[player_order[ind]]
+			break
+	active_player = null
+	
