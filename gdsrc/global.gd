@@ -31,6 +31,7 @@ var board_data: Dictionary = {}
 var ultra_mek_cpp: UltraMekGD = UltraMekGD.new()
 var players: Dictionary = {}
 var active_player: Player = null
+var session_players: Array[String] = []
 var player_order: Array[String] = []
 
 # Geometry
@@ -43,6 +44,7 @@ var game_client: Node = null
 var controls: Node = null
 var sound: Node = null
 var board: Node = null
+var settings: SettingsManager = SettingsManager.new()
 
 const mecha_font: FontFile = preload("res://assets/fonts/mechaside/Mechaside-Regular.ttf")
 

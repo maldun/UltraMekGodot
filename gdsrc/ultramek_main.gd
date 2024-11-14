@@ -88,6 +88,7 @@ func _tcp_server_connect()->String:
 func _read_settings(filename: String)->void:
 	settings = DataHandler.get_json_data(filename)
 	game_settings = DataHandler.get_json_data(settings[GAME_SETTINGS_KEY])
+	Global.settings.set_settings(settings,game_settings)
 
 func _hide_main_menu()->void:
 	main_menu_node.visible = false
@@ -140,9 +141,17 @@ func _game_start_process(delta: float)->void:
 func _setup_session()->void:
 	Global.round_nr = 0
 	Global.player_order = []
+	if Global.settings.get_session_type()==SettingsManager.HOT_SEAT_SESSION:
+		assert(Global.settings.get_session_player_number()>1,"Too few players for hotseat!")
+		for p in Global.players.keys():
+			Global.session_players.append(p)
+	else:
+		assert(false,"Session type unknown!")
+	
+	# before initiative assume all are equal ...
 	for p in Global.players.keys():
 		Global.player_order.append(p)
-	Global.active_player = Global.players[Global.player_order[0]]
+	Global.active_player = Global.players[Global.settings.get_host_player()]
 	
 
 func _collect_board_data(dim_x:int,dim_y:int)->void:
@@ -180,12 +189,18 @@ func _deployment_process(delta: float)->void:
 
 func _roll_initiative(player_name: String):
 	var initiative_data: Dictionary = {Global.PLAYER_KEY:player_name}
-	#request_initiative_signal.emit(initiative_data)
+	request_initiative_signal.emit(initiative_data)
 	Global.sound.play_dice_sound()
+	
+func _set_initiatives(init_data: Dictionary)->void:
+	print("Init rolled: ",init_data)
+	initiative_recieved = true
 	
 func _initiative_process()->void:
 	if initiative_hud_node != null:
 		initiative_hud_node.connect(InitiativeHud.INIT_BUTTON_PRESSED_SIGNAL,_roll_initiative)
+	if game_client != null:
+		game_client.connect(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

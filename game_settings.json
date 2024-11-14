@@ -3,6 +3,7 @@
 	{"player1":{"Name":"Player","forces":"test/samples/player1.mul","deployment_border":"S","color":[0.5,0,0]},
 	 "player2":{"Name":"Player2","forces":"test/samples/player2.mul","deployment_border":"N","color":[0.0,0,0.5]}
 	},
+"host_player":"player1",
 "board":"test/samples/snow.board",
 "game_settings":{"session_type":"hot_seat"}
 }

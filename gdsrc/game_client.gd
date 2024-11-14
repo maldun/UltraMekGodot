@@ -91,9 +91,9 @@ func request_board(fname: String) -> void:
 func _requesting(request_dic: Dictionary,
 	  request_flag: bool, request_type:String):
 	var answer: String = NONE_ANSWER
-	print("Sent: ", request_dic)
 	if request_flag == true:
 		var request: String = await _request_dict(request_dic,request_type)
+		print("Sent: ", request)
 		var message: PackedByteArray = await request.to_utf8_buffer() 
 		await _client.connect_to_host(HOST, PORT)
 		await _handle_client_data(message)
@@ -115,9 +115,12 @@ func request_players(players: Dictionary):
 		player_requested = false
 
 func start_requesting_players(players_rec: Dictionary):
+	#if Global.count == 0:
 	player_requested = true
 	players = players_rec
 	print("Alert: Forces: ",players)
+	#	Global.count += 1
+	
 
 func request_action(actions: Dictionary):
 	var answer_dict = await _requesting(actions,action_requested,ACT_RQ)
@@ -134,12 +137,14 @@ func start_requesting_action(action_request: Dictionary):
 
 func request_initiative(initiative: Dictionary):
 	var answer_dict = await _requesting(initiative,initiative_requested,INI_RQ)
+	print("Player requested: ",player_requested)
 	if answer_dict != null:
-		print("Answer Dict: ", answer_dict)
-		var recieved_result = answer_dict[INI_RQ]
-		print("Answer (Initiative): ",recieved_result)
-		recieved_initiative_data.emit(recieved_result)
-		initiative_requested=false
+		print("init answer: ", answer_dict)
+		if INI_RQ in answer_dict.keys():
+			var recieved_result = answer_dict[INI_RQ]
+			print("Answer (Initiative): ",recieved_result)
+			recieved_initiative_data.emit(recieved_result)
+			initiative_requested=false
 
 func start_requesting_initiative(initiative_request: Dictionary):
 	initiative_requested = true
@@ -151,15 +156,14 @@ func _process_routine(delta: float) -> void:
 	#var fname: String = "test/samples/snow.board"
 	if main_node != null:
 		await main_node.connect(UltraMekMain.REQUEST_BOARD_SIGNAL,start_requesting_board)
+		await main_node.connect(UltraMekMain.REQUEST_PLAYERS_SIGNAL,start_requesting_players)
+		await main_node.connect(UltraMekMain.REQUEST_INITIATIVE_SIGNAL,start_requesting_initiative)
+		
 		if main_node.board_recieved == false:
 			await request_board(board_fname)
-		
-		await main_node.connect(UltraMekMain.REQUEST_PLAYERS_SIGNAL,start_requesting_players)
 		if main_node.players_recieved == false:
 			await request_players(players)
-			
-		await main_node.connect(UltraMekMain.REQUEST_INITIATIVE_SIGNAL,start_requesting_initiative)
-		if 	main_node.initiative_recieved == false:
+		if main_node.initiative_recieved == false:
 			await request_initiative(initiative)
 			
 func _handle_client_data(data: PackedByteArray) -> bool:
