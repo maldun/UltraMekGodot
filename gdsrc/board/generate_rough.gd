@@ -15,10 +15,10 @@ const rock_map = {"snow": {0:rock1_snow,
 
 static func generate(ttype: String, hex: Hex, is_light:bool = true):
 	var nr_trees: int = NR_STONES_LIGHT if is_light == true else NR_STONES_HEAVY
-	var center: Vector2 = hex.hex_center
-	var height: float = hex.hex_height
+	#var center: Vector2 = hex.hex_center
+	#var height: float = hex.hex_height
 	var unit_length: float = hex.unit_length
-	var radius: float = unit_length*0.9
+	#var radius: float = unit_length*0.9
 	var rng = RandomNumberGenerator.new()
 	var nr_stone_types = len(rock_map[ttype])
 	var scenes = []

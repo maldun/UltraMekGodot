@@ -12,6 +12,8 @@ var sound_file_map: Dictionary = {}
 var sound_map: Dictionary = {}
 var sound_default_path: String
 
+var connected: bool = false
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	var settings: Dictionary = DataHandler.get_json_data(UltraMekMain.SETTING_FILE)
@@ -40,9 +42,10 @@ func play_dice_sound()->void:
 	play()
 	
 func deployment_sounds(delta: float)->void:
-	if Global.main != null:
+	if Global.main != null and connected == false:
 		Global.main.connect(UltraMekMain.DEPLOY_UNIT_SIGNAL,play_landing_sound)
 		Global.main.connect(UltraMekMain.PLAY_PHASE_START_SOUND_SIGNAL,play_game_phase_start_sound)
+		connected = true
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

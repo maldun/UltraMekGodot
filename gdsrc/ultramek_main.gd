@@ -12,6 +12,11 @@ signal request_players_signal(forces: Dictionary)
 const REQUEST_INITIATIVE_SIGNAL: String = "request_initiative_signal"
 signal request_initiative_signal(data: Dictionary)
 
+const REQUEST_SIGNAL: String = "request_signal"
+signal request_signal(requet_type: String, request_data: Dictionary,req_id: int)
+var request_counter: int = 0
+var active_requests: Array[int] = []
+
 const DEPLOY_UNIT_SIGNAL: String = "deploy_unit_signal"
 signal deploy_unit_signal(player_name: String, unit_id: String,pos: Vector3)
 
@@ -61,6 +66,7 @@ var current_game_phase: String
 var settings_recieved: bool = false
 var board_recieved: bool = false 
 var players_recieved: bool = false
+var answer_recieved: bool = false
 var game_settings_set: bool = false
 var game_set_up: bool = false
 var initiative_recieved: bool = false
@@ -72,11 +78,31 @@ func _ready() -> void:
 	await _read_settings(SETTING_FILE)
 	await _setup_game()
 	Global.main = self
+	await _connect_signals()
+
+func _connect_signals()->void:
+	var status = await connect_server_button.connect("connect_tcp_server",_tcp_server_connect)
+	await game_client.connect(UltraMekClient.RECIEVED_PLAYER_SIGNAL,_collect_player_data)
+	new_game_button.connect("new_game_start",_new_game_start)
+	await Global.connect("processed_board_data",_collect_board_data)
+	game_client.connect(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives)
+	game_client.connect(UltraMekClient.DEACTIVATE_REQUEST_SIGNAL,_deactivate_request)
+
+func _send_request(request_type: String, request_data: Dictionary)->void:
+	request_signal.emit(request_type,request_data,request_counter)
+	active_requests.append(request_counter)
+	request_counter = (request_counter+1)%10000001
+	
+func _deactivate_request(req_id: int)->void:
+	var ind: int = await active_requests.find(req_id)
+	if ind >= 0:
+		active_requests.remove_at(ind)
+	
 
 func _tcp_server_connect()->String:
 	print("Alert: Main Menu Server Connect")
 	#connect_tcp_server_main.emit()
-	game_client = UltraMekClient.new()
+	#game_client = UltraMekClient.new()
 	game_client.name = TCP_NODE_NAME
 	var host = DEFAULT_HOST
 	var port = DEFAULT_PORT
@@ -114,24 +140,25 @@ func _new_game_start(fname: String,players: Dictionary,settings: Dictionary)->vo
 	_hide_main_menu()
 	if game_client._connect_tcp == true:
 		print("Alert: Game Start")
-		request_board_signal.emit(fname)
-		request_players_signal.emit(players)
+		_send_request(UltraMekClient.MAP_RQ,{"filename":fname})
+		_send_request(UltraMekClient.PLA_RQ,players)
 		
 		
 func _server_process(delta: float) -> void:
-	var status = await connect_server_button.connect("connect_tcp_server",_tcp_server_connect)
+	pass
+	#var status = await connect_server_button.connect("connect_tcp_server",_tcp_server_connect)
 
 func _game_start_process(delta: float)->void:
 	if game_client._connect_tcp == true: 
 		if new_game_button.disabled == true:
 			new_game_button.disabled = false
-		new_game_button.connect("new_game_start",_new_game_start)
+		#new_game_button.connect("new_game_start",_new_game_start)
 	else:
 		new_game_button.disabled = true
 		
 	if Global.game_phase == Global.PREPARATION_PHASE:
-		await Global.connect("processed_board_data",_collect_board_data)
-		game_client.connect("recieved_player_data",_collect_player_data)
+		#await Global.connect("processed_board_data",_collect_board_data)
+		#await game_client.connect(UltraMekClient.RECIEVED_PLAYER_SIGNAL,_collect_player_data)
 		if _check_game_ready(delta) == true:
 			_setup_session()
 			#Global.game_phase = Global.DEPLOYMENT_PHASE
@@ -199,8 +226,12 @@ func _set_initiatives(init_data: Dictionary)->void:
 func _initiative_process()->void:
 	if initiative_hud_node != null:
 		initiative_hud_node.connect(InitiativeHud.INIT_BUTTON_PRESSED_SIGNAL,_roll_initiative)
-	if game_client != null:
-		game_client.connect(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives)
+	#if game_client != null:
+	#	game_client.connect(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives)
+
+func _update_request_process()->void:
+	pass
+	#game_client.connect(UltraMekClient.DEACTIVATE_REQUEST_SIGNAL,_deactivate_request)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -210,12 +241,14 @@ func _process(delta: float) -> void:
 		_setup_hud(delta)
 		_initiative_process()
 		_deployment_process(delta)
+		_update_request_process()
 		
 		
-	print("Alert: Game State: ",Global.game_state)
-	print("Alert: Game Phase: ",Global.game_phase)
+	#print("Alert: Game State: ",Global.game_state)
+	#print("Alert: Game Phase: ",Global.game_phase)
 	
 func _setup_game():
+	game_client = UltraMekClient.new()
 	_apply_game_settings()
 	_setup_buttons()
 	_set_mouse()

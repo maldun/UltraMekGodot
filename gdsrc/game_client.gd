@@ -4,6 +4,7 @@ extends Node
 var HOST: String = "127.0.0.1"
 var PORT: int = 8563
 const RECONNECT_TIMEOUT: float = 3.0
+const DELAY_TIMEOUT: float = 0.3
 
 const NONE_ANSWER: String = "Nothing!"
 
@@ -28,13 +29,27 @@ signal recieved_action_data(action_json: Dictionary)
 const RECIEVED_INITIATIVE_SIGNAL: String = "recieved_initiative_data"
 signal recieved_initiative_data(initiative_json: Dictionary)
 
-#const Client = preload("res://tcp_client.gd")
-#var _client: Client = Client.new()
+const ANSWER_RECIEVED_SIGNAL: String = "answer_recieved_signal"
+signal answer_recieved_signal(request_type: String, data: Dictionary)
+
+const SIGNAL_MAP: Dictionary = {PLA_RQ:RECIEVED_PLAYER_SIGNAL,
+								INI_RQ:RECIEVED_INITIATIVE_SIGNAL,
+								MAP_RQ:RECIEVED_BOARD_SIGNAL,
+								}
+
+const DEACTIVATE_REQUEST_SIGNAL: String = "deactivate_request_signal"
+signal deactivate_request_signal(req_id: int)
+
 var _client: UltraMekTCPClient # = UltraMekTCPClient.new()
-var board_requested: bool = false
-var player_requested: bool = false
-var action_requested: bool = false
-var initiative_requested: bool = false
+
+var board_requested = false
+var requested: bool = false
+var current_request: int = -1
+var request_stack: Array[String] = []
+var request_data_stack: Array = []
+var active_ids: Array[int] = []
+var processed_data_stack: Array = []
+
 var board_fname: String = ""
 var players: Dictionary = {}
 var actions: Dictionary = {}
@@ -47,7 +62,7 @@ func set_host_and_port(host: String, port: int):
 	PORT = port
 
 func _get_connect_signal():
-	print("Alert: Got connect signal from main!")
+	#print("Alert: Got connect signal from main!")
 	_connect_tcp = true
 
 func _ready() -> void:
@@ -55,10 +70,9 @@ func _ready() -> void:
 	_client = UltraMekTCPClient.new()
 	#_client.connect("data", _print_server_data)
 	add_child(_client)
-	board_requested = false
-	player_requested = false
 	_connect_tcp = false
 	main_node = get_parent()
+	main_node.connect(UltraMekMain.REQUEST_SIGNAL,start_requesting)
 
 func _process(delta: float) -> void:
 	#var mm = get_parent()
@@ -81,20 +95,20 @@ func request_board(fname: String) -> void:
 		var answer_dict = JSON.parse_string(answer)
 		if answer_dict != null:
 			var recieved_map = answer_dict[MAP_RQ] 
-			print("Answer: ", recieved_map)
+			#print("Answer: ", recieved_map)
 			recieved_board.emit(recieved_map)
 			board_requested = false
 			board_fname = ''
 	
 	#return answer
 
-func _requesting(request_dic: Dictionary,
-	  request_flag: bool, request_type:String):
+func _requesting(request_dic: Dictionary, request_type:String):
 	var answer: String = NONE_ANSWER
-	if request_flag == true:
+	#if true == true:
+	if len(main_node.active_requests)>0:
 		var request: String = await _request_dict(request_dic,request_type)
-		print("Sent: ", request)
-		var message: PackedByteArray = await request.to_utf8_buffer() 
+		#print("Sent: ", request)
+		var message: PackedByteArray = await request.to_utf8_buffer()
 		await _client.connect_to_host(HOST, PORT)
 		await _handle_client_data(message)
 		answer = await _client.recieve()
@@ -105,71 +119,74 @@ func start_requesting_board(fname: String):
 	board_requested = true
 	board_fname = fname
 	#print("Sent board 1: ", board_requested, board_fname)
-
-func request_players(players: Dictionary):
-	var answer_dict = await _requesting(players,player_requested,PLA_RQ)
-	if answer_dict != null:
-		var recieved_players = answer_dict[PLA_RQ] 
-		print("Answer (Players): ", recieved_players)
-		recieved_player_data.emit(recieved_players)
-		player_requested = false
-
-func start_requesting_players(players_rec: Dictionary):
-	#if Global.count == 0:
-	player_requested = true
-	players = players_rec
-	print("Alert: Forces: ",players)
-	#	Global.count += 1
 	
+func start_requesting(request_type_key: String, request_data_dict: Dictionary, req_id: int):
+	requested = true
+	#request_type = request_type_key
+	#request_data = request_data_dict
+	if not req_id in active_ids:
+		request_stack.append(request_type_key)
+		request_data_stack.append(request_data_dict)
+		active_ids.append(req_id)
+		current_request = req_id
+		
 
-func request_action(actions: Dictionary):
-	var answer_dict = await _requesting(actions,action_requested,ACT_RQ)
-	if answer_dict != null:
-		var recieved_result = answer_dict[ACT_RQ]
-		print("Answer (Action): ",recieved_result)
-		recieved_action_data.emit(recieved_result)
-		action_requested=false
-
-func start_requesting_action(action_request: Dictionary):
-	action_requested = true
-	actions = action_request
-	print("Alert: action: ",actions)
-
-func request_initiative(initiative: Dictionary):
-	var answer_dict = await _requesting(initiative,initiative_requested,INI_RQ)
-	print("Player requested: ",player_requested)
-	if answer_dict != null:
-		print("init answer: ", answer_dict)
-		if INI_RQ in answer_dict.keys():
-			var recieved_result = answer_dict[INI_RQ]
-			print("Answer (Initiative): ",recieved_result)
-			recieved_initiative_data.emit(recieved_result)
-			initiative_requested=false
-
-func start_requesting_initiative(initiative_request: Dictionary):
-	initiative_requested = true
-	initiative = initiative_request
-	print("Alert: Initiative: ",initiative)
-
+func requesting()->void:
+	if len(request_stack)>0 and len(request_data_stack)>0:
+		var RQ_type = request_stack[0]
+		var requested_data = request_data_stack[0]
+		var req_id: int = active_ids[0]
+		var answer_dict = await _requesting(requested_data,RQ_type)
+		#print("Requested2: ",RQ_type, answer_dict if answer_dict == null else len(answer_dict))
+		if answer_dict != null:
+			if RQ_type in answer_dict.keys():
+				var recieved_result = answer_dict[RQ_type]
+				print("Answer: ",recieved_result)
+				processed_data_stack.append(recieved_result)
+				emit_signal(SIGNAL_MAP[RQ_type],recieved_result)
+				requested=false
+				request_data_stack.pop_front()
+				request_stack.pop_front()
+				active_ids.pop_front()
+				deactivate_request_signal.emit(req_id)
+				current_request = -1
+			
+func _cleanup_active_requests()->void:
+	var new_active_ids: Array[int] = []
+	var new_request_stack: Array[String] = []
+	var new_request_data_stack: Array = []
+	for counter in range(len(active_ids)):
+		var id: int = active_ids[counter]
+		if id in main_node.active_requests:
+			new_active_ids.append(id)
+			new_request_stack.append(request_stack[counter])
+			new_request_data_stack.append(request_data_stack[counter])
+	active_ids = new_active_ids
+	request_stack = new_request_stack
+	request_data_stack = new_request_data_stack
 
 func _process_routine(delta: float) -> void:
 	#var fname: String = "test/samples/snow.board"
 	if main_node != null:
-		await main_node.connect(UltraMekMain.REQUEST_BOARD_SIGNAL,start_requesting_board)
-		await main_node.connect(UltraMekMain.REQUEST_PLAYERS_SIGNAL,start_requesting_players)
-		await main_node.connect(UltraMekMain.REQUEST_INITIATIVE_SIGNAL,start_requesting_initiative)
+		#await main_node.connect(UltraMekMain.REQUEST_SIGNAL,start_requesting)
 		
-		if main_node.board_recieved == false:
-			await request_board(board_fname)
-		if main_node.players_recieved == false:
-			await request_players(players)
-		if main_node.initiative_recieved == false:
-			await request_initiative(initiative)
+		if len(main_node.active_requests) < len(active_ids):
+			await _cleanup_active_requests()
+		#print("Stack: ",request_stack,main_node.active_requests,)#processed_data_stack)
+			
+		if (len(main_node.active_requests) > 0 and len(request_stack) > 0 and 
+			len(request_data_stack)>0 and (current_request in main_node.active_requests or current_request == -1)):
+			
+			if current_request != active_ids[0]:
+				current_request = active_ids[0]
+			else:
+				# keeps requesting in check
+				await get_tree().create_timer(DELAY_TIMEOUT).timeout
+				await requesting()
 			
 func _handle_client_data(data: PackedByteArray) -> bool:
-	#print("Client data 2 : ", data.get_string_from_utf8())
 	var message: PackedByteArray = data
-	await _client.send(message)
+	var result = await _client.send(message)
 	return true
 	
 func _request_map_file(filename: String) -> String:
@@ -191,4 +208,4 @@ func _init_cpp_bindings() -> void:
 	print("Sumx2: ", s.doubling(60))
 	print("Unit Length: ", s.get_unit_length())
 	var centers = s.create_grid_centers(16,17)
-	print("Centers: ",centers)
+	#print("Centers: ",centers)

@@ -109,12 +109,14 @@ func add_label(label: String, color: Color)-> void:
 	label3d.name = "Label" + name
 	var pos: Vector3 = Vector3(hex_center[0],hex_height*1.01,hex_center[1])
 	pos[2] = pos[2]+unit_length/2.0
-	label3d.global_position = pos
+	label3d.set_position(pos)
+	#label3d.set_global_position(pos)
+	add_child(label3d)
 	label3d.rotate_x(PI/2)
 	label3d.rotate_y(PI)
 	label3d.rotate_z(PI)
 	label3d.set("theme_override_colors/font_color",color)
-	add_child(label3d)
+	
 
 func generate_decoration(data: Dictionary,i:int,j:int) -> void:
 	var wood: int = int(data["woods"][i][j]) 

@@ -49,12 +49,10 @@ func draw_texture(data: Dictionary,xi: int,yj: int):
 	#if ttype == "snow":
 	texture_fname = get_tile(asset_data,height,rough,wood,swamp,water,road)
 	
-	print("texture fname: ",texture_fname)
 	return load(texture_fname)
 	
 func get_road_tile(tile_fname: String, road) -> String:
 	var fname: String = "road" + ("%02d" % road[1]) + "_" + tile_fname
-	print("Road: ",fname)
 	return fname
 			
 func get_tile(asset_data: Dictionary, height: int,rough: int,wood: int,swamp: int,water: int,
@@ -121,14 +119,6 @@ func create_board(data: Dictionary) -> void:
 	var size_y = int(data["size_y"])
 	var centers = s.setup_board_geometry(size_x,size_y,unit_length,unit_height)
 	# = s.get_grid_centers()#(size_x,size_y)
-	#print("Centers: ",centers)
-	#print("Dimx: ",size_x,"Dimy: ",size_y)
-	#print("Test Vector: ",s.compute_euclidean(3.0,4.0)==5.0)
-	#var dim_x: int = 3
-	#var dim_y: int = 3
-	#var warrr: Array = [0,1,2,10,1,1,2,1,1]
-	#print("Test Board Graph Creation: ",s.create_board_graph(dim_x,dim_y,warrr))
-	#print("Test Board Graph Path: ",s.compute_shortest_walk_ids(0,8))
 	# send data to main
 	Global.processed_board_data.emit(size_x,size_y)
 	print("Alert: board_data_sent")
@@ -179,6 +169,12 @@ func create_board(data: Dictionary) -> void:
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass
+	Global.controls.connect(UltraMekControls.ROTATE_DEPL_POINTER_SIGNAL,_rotate_deployment_pointer)
+	Global.controls.connect(UltraMekControls.REMOVE_POINTER_SIGNAL,_remove_pointer)
+	var client_node = Global.game_client
+	#if client_node != null:
+	await client_node.connect("recieved_board",_recieved_board)
+	Global.main.connect(UltraMekMain.DEPLOY_UNIT_SIGNAL,_deploy_unit)
 	
 	
 func _recieved_board(recieved_map) -> void:
@@ -218,18 +214,19 @@ func _remove_pointer(player_name: String, unit_id: String):
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	pass
 	#var mm = get_tree().get_root().get_node(UltraMekMain.NODE_NAME)
 	#print("Main Variables: ",mm.ultra_mek_cpp.get_unit_length())
 	#var client_node = mm.get_node(mm.TCP_NODE_NAME)
 	
-	var client_node = Global.game_client
-	if client_node != null:
-		await client_node.connect("recieved_board",_recieved_board)
+	#var client_node = Global.game_client
+	#if client_node != null:
+	#	await client_node.connect("recieved_board",_recieved_board)
 		
-	if Global.controls != null:
-		Global.controls.connect(UltraMekControls.ROTATE_DEPL_POINTER_SIGNAL,_rotate_deployment_pointer)
-		Global.controls.connect(UltraMekControls.REMOVE_POINTER_SIGNAL,_remove_pointer)
+	#if Global.controls != null:
+	#	Global.controls.connect(UltraMekControls.ROTATE_DEPL_POINTER_SIGNAL,_rotate_deployment_pointer)
+	#	Global.controls.connect(UltraMekControls.REMOVE_POINTER_SIGNAL,_remove_pointer)
 		
-	if Global.main != null:
-		Global.main.connect(UltraMekMain.DEPLOY_UNIT_SIGNAL,_deploy_unit)
+	#if Global.main != null:
+	#	Global.main.connect(UltraMekMain.DEPLOY_UNIT_SIGNAL,_deploy_unit)
 	

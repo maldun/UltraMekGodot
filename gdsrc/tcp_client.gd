@@ -44,6 +44,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var new_status: int = _process_update(delta)
+	_status = new_status
 	
 	#if _status == _stream.STATUS_CONNECTED:
 	#	var available_bytes: int = _stream.get_available_bytes()
@@ -61,6 +62,8 @@ func connect_to_host(host: String, port: int) -> bool:
 	print("Connecting to %s:%d" % [host, port])
 	# Reset status so we can tell if it changes to error again.
 	_status = _stream.STATUS_NONE
+	if _stream.get_status() != _stream.STATUS_NONE:
+		return true
 	if _stream.connect_to_host(host, port) != OK:
 		#print("Error connecting to host.")
 		emit_signal("error")
@@ -81,7 +84,7 @@ func send(data: PackedByteArray,timeout: float = _timeout) -> bool:
 		#return false
 		_status = _stream.poll()
 		counter += 1
-		if counter > 10000:
+		if counter > 1000:
 			return false
 	#print("Status after poll: ",_status)
 	var error: int = _stream.put_data(data)
@@ -99,7 +102,7 @@ func recieve(timeout: float = _timeout) -> String:
 		await get_tree().create_timer(timeout).timeout
 		_status = _stream.poll()
 		counter += 1
-		if counter > 10000:
+		if counter > 1000:
 			return "__ERROR__"
 	#print("Status after poll: ",_status)
 	var available_bytes: int = _stream.get_available_bytes()
