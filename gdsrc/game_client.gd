@@ -5,6 +5,7 @@ var HOST: String = "127.0.0.1"
 var PORT: int = 8563
 const RECONNECT_TIMEOUT: float = 3.0
 const DELAY_TIMEOUT: float = 0.3
+var time_track: float = 0
 
 const NONE_ANSWER: String = "Nothing!"
 
@@ -38,7 +39,7 @@ const SIGNAL_MAP: Dictionary = {PLA_RQ:RECIEVED_PLAYER_SIGNAL,
 								}
 
 const DEACTIVATE_REQUEST_SIGNAL: String = "deactivate_request_signal"
-signal deactivate_request_signal(req_id: int)
+signal deactivate_request_signal(req_id: int,req_type: String)
 
 var _client: UltraMekTCPClient # = UltraMekTCPClient.new()
 
@@ -107,12 +108,14 @@ func _requesting(request_dic: Dictionary, request_type:String):
 	#if true == true:
 	if len(main_node.active_requests)>0:
 		var request: String = await _request_dict(request_dic,request_type)
-		#print("Sent: ", request)
+		print("Sent: ", request)
 		var message: PackedByteArray = await request.to_utf8_buffer()
 		await _client.connect_to_host(HOST, PORT)
 		await _handle_client_data(message)
 		answer = await _client.recieve()
-		var answer_dict = JSON.parse_string(answer)
+		var answer_dict = {}
+		if answer != _client.ERROR_MSG:
+			answer_dict = JSON.parse_string(answer)
 		return answer_dict
 	
 func start_requesting_board(fname: String):
@@ -148,8 +151,11 @@ func requesting()->void:
 				request_data_stack.pop_front()
 				request_stack.pop_front()
 				active_ids.pop_front()
-				deactivate_request_signal.emit(req_id)
+				deactivate_request_signal.emit(req_id,RQ_type)
 				current_request = -1
+				time_track = 0
+				
+		
 			
 func _cleanup_active_requests()->void:
 	var new_active_ids: Array[int] = []
@@ -168,20 +174,21 @@ func _cleanup_active_requests()->void:
 func _process_routine(delta: float) -> void:
 	#var fname: String = "test/samples/snow.board"
 	if main_node != null:
-		#await main_node.connect(UltraMekMain.REQUEST_SIGNAL,start_requesting)
-		
 		if len(main_node.active_requests) < len(active_ids):
 			await _cleanup_active_requests()
-		#print("Stack: ",request_stack,main_node.active_requests,)#processed_data_stack)
-			
+		print("Stack: ",request_stack,main_node.active_requests,)#processed_data_stack)
 		if (len(main_node.active_requests) > 0 and len(request_stack) > 0 and 
 			len(request_data_stack)>0 and (current_request in main_node.active_requests or current_request == -1)):
-			
+			time_track += delta
+				
 			if current_request != active_ids[0]:
 				current_request = active_ids[0]
 			else:
+				if time_track > DELAY_TIMEOUT*10:
+					await _client.disconnect_from_host()
+					time_track = 0
 				# keeps requesting in check
-				await get_tree().create_timer(DELAY_TIMEOUT).timeout
+				#await get_tree().create_timer(DELAY_TIMEOUT).timeout
 				await requesting()
 			
 func _handle_client_data(data: PackedByteArray) -> bool:

@@ -16,6 +16,7 @@ const REQUEST_SIGNAL: String = "request_signal"
 signal request_signal(requet_type: String, request_data: Dictionary,req_id: int)
 var request_counter: int = 0
 var active_requests: Array[int] = []
+var active_request_types: Array[String] = []
 
 const DEPLOY_UNIT_SIGNAL: String = "deploy_unit_signal"
 signal deploy_unit_signal(player_name: String, unit_id: String,pos: Vector3)
@@ -43,13 +44,15 @@ const NEW_GAME_BUTTON: String = "NewGameButton"
 const SETTING_FILE: String = "res://settings.json"
 const GAME_SETTINGS_KEY: String = "game_settings"
 const BOARD_KEY: String = "board"
-const PLAYER_KEY: String = "players"
+const PLAYERS_KEY: String = "players"
+const PLAYER_KEY: String = "player"
 const INITIATIVE_HUD_NAME: String = "InitiativeHud"
 const DEPLOYMENT_HUD_NAME: String = "DeploymentHud"
 
 var game_client: UltraMekClient = null
 var settings: Dictionary = {}
 var game_settings: Dictionary = {}
+var initiatives: Dictionary = {}
 
 # main menu buttons
 var main_menu_node: Node
@@ -69,7 +72,6 @@ var players_recieved: bool = false
 var answer_recieved: bool = false
 var game_settings_set: bool = false
 var game_set_up: bool = false
-var initiative_recieved: bool = false
 var hotseat: bool = true
 
 # Called when the node enters the scene tree for the first time.
@@ -89,14 +91,17 @@ func _connect_signals()->void:
 	game_client.connect(UltraMekClient.DEACTIVATE_REQUEST_SIGNAL,_deactivate_request)
 
 func _send_request(request_type: String, request_data: Dictionary)->void:
-	request_signal.emit(request_type,request_data,request_counter)
-	active_requests.append(request_counter)
-	request_counter = (request_counter+1)%10000001
+	if not request_type in active_request_types:
+		request_signal.emit(request_type,request_data,request_counter)
+		active_requests.append(request_counter)
+		active_request_types.append(request_type)
+		request_counter = (request_counter+1)%10000001
 	
-func _deactivate_request(req_id: int)->void:
+func _deactivate_request(req_id: int,req_type: String)->void:
 	var ind: int = await active_requests.find(req_id)
 	if ind >= 0:
 		active_requests.remove_at(ind)
+		active_request_types.remove_at(ind)
 	
 
 func _tcp_server_connect()->String:
@@ -175,9 +180,7 @@ func _setup_session()->void:
 	else:
 		assert(false,"Session type unknown!")
 	
-	# before initiative assume all are equal ...
-	for p in Global.players.keys():
-		Global.player_order.append(p)
+	# before initiative we start with the host.
 	Global.active_player = Global.players[Global.settings.get_host_player()]
 	
 
@@ -216,18 +219,40 @@ func _deployment_process(delta: float)->void:
 
 func _roll_initiative(player_name: String):
 	var initiative_data: Dictionary = {Global.PLAYER_KEY:player_name}
-	request_initiative_signal.emit(initiative_data)
+	_send_request(UltraMekClient.INI_RQ,initiative_data)
 	Global.sound.play_dice_sound()
-	
+
+func _finish_initiative_phase(player_name: String):
+	if Global.round_nr == 0:
+		Global.game_phase = Global.DEPLOYMENT_PHASE
+	else:
+		Global.game_phase = Global.MOVEMENT_PHASE
+	Global.round_nr += 1
+
 func _set_initiatives(init_data: Dictionary)->void:
-	print("Init rolled: ",init_data)
-	initiative_recieved = true
+	#print("Init rolled: ",init_data)
+	var player_name: String = init_data[Global.PLAYER_KEY]
+	var init: int = init_data[Global.INITIATIVE_ROLLED_KEY]
+	var order: Array[String] = [] 
+	for ini in init_data[Global.PLAYER_ORDER_KEY]:
+		order.append(str(ini))
+		
+	initiatives[player_name] = init
+	if len(order)>0:
+		Global.player_order = order
 	
 func _initiative_process()->void:
 	if initiative_hud_node != null:
-		initiative_hud_node.connect(InitiativeHud.INIT_BUTTON_PRESSED_SIGNAL,_roll_initiative)
-	#if game_client != null:
-	#	game_client.connect(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives)
+		if not initiative_hud_node.is_connected(InitiativeHud.INIT_BUTTON_PRESSED_SIGNAL,_roll_initiative):
+			initiative_hud_node.connect(InitiativeHud.INIT_BUTTON_PRESSED_SIGNAL,_roll_initiative)
+		if not initiative_hud_node.is_connected(InitiativeHud.INIT_BUTTON_PRESSED2_SIGNAL,_finish_initiative_phase):
+			initiative_hud_node.connect(InitiativeHud.INIT_BUTTON_PRESSED2_SIGNAL,_finish_initiative_phase)
+		if Global.active_player.get_player_name() in initiatives.keys():
+			var pname: String = Global.active_player.get_player_name()
+			initiative_hud_node.show_initiative_button(pname, initiatives[pname])
+	if game_client != null and not game_client.is_connected(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives):
+		game_client.connect(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives)
+	
 
 func _update_request_process()->void:
 	pass

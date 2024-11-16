@@ -7,6 +7,8 @@ signal data           # Received data from server
 signal disconnected   # Disconnected from server
 signal error          # Error with connection to server
 
+const ERROR_MSG = "__ERROR__"
+
 var _connect_tcp: bool = false
 var _status: int = 0
 var _stream: StreamPeerTCP
@@ -38,7 +40,7 @@ func _process_update(delta: float) -> int:
 func _ready() -> void:
 	_stream = StreamPeerTCP.new()
 	_status = _stream.get_status()
-	_stream.set_no_delay(true)
+	_stream.set_no_delay(false)
 	print("Alert: TCP Started")
 	_connect_tcp = false
 
@@ -75,6 +77,7 @@ func disconnect_from_host() -> void:
 	_stream.disconnect_from_host()
 	
 func send(data: PackedByteArray,timeout: float = _timeout) -> bool:
+	await get_tree().create_timer(timeout).timeout
 	_status = _stream.get_status()
 	#print("Status before poll: ",_status, _stream.STATUS_CONNECTED)
 	var counter: int = 0
@@ -84,7 +87,7 @@ func send(data: PackedByteArray,timeout: float = _timeout) -> bool:
 		#return false
 		_status = _stream.poll()
 		counter += 1
-		if counter > 1000:
+		if counter > 10:
 			return false
 	#print("Status after poll: ",_status)
 	var error: int = _stream.put_data(data)
@@ -103,7 +106,7 @@ func recieve(timeout: float = _timeout) -> String:
 		_status = _stream.poll()
 		counter += 1
 		if counter > 1000:
-			return "__ERROR__"
+			return ERROR_MSG
 	#print("Status after poll: ",_status)
 	var available_bytes: int = _stream.get_available_bytes()
 	if available_bytes > 0:
@@ -113,6 +116,6 @@ func recieve(timeout: float = _timeout) -> String:
 		return output
 		if len(output) == 0:
 			print("Error writing to stream: ", error)
-			return "__ERROR__"
-		return "__ERROR__"
-	return "__ERROR__"
+			return ERROR_MSG
+		return ERROR_MSG
+	return ERROR_MSG

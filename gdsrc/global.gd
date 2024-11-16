@@ -6,6 +6,9 @@ const FORCES_KEY: String = "forces"
 const BOARD_KEY: String = "board"
 const PLAYER_KEY: String = "player"
 
+const INITIATIVE_ROLLED_KEY: String = "initiative_rolled"
+const PLAYER_ORDER_KEY: String = "player_order"
+
 var game_metadata: Dictionary = {}
 
 # Phases
@@ -59,11 +62,19 @@ func _process(delta: float) -> void:
 	
 func next_player()->void:
 	var active_name: String = active_player.get_player_name()
-	var lp: int = len(player_order)
-	for k in range(lp):
-		if player_order[k] == active_name:
-			var ind: int = (k+1)%lp
-			active_player = players[player_order[ind]]
-			break
+	var order: Array[String] = []
+	# before initiative assume all are equal ...
+	if len(player_order) == 0:
+		for p in Global.players.keys():
+			order.append(p)
+	else:
+		order = player_order
+		
+	var lp: int = len(order)
 	active_player = null
+	for k in range(lp):
+		if order[k] == active_name:
+			var ind: int = (k+1)%lp
+			active_player = players[order[ind]]
+			break
 	
