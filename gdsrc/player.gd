@@ -10,16 +10,17 @@ const IMAGE_2D_KEY: String = "gfx_2d_image"
 const COLOR_KEY: String = "color"
 const DEFAULT_ALPHA: float = 0.5
 const PLAYER_PREFFIX: String = "Player_"
+const PLAYER_NAME_KEY: String = "Name"
 
 var player_data: Dictionary = {}
 var forces_gfx_data: Dictionary = {}
 var figures: Dictionary = {}
-var player_name: String = ""
+var player_id: String = ""
 var player_color: Color
 var pointers: Dictionary = {}
 
 func setup_player(name: String, data: Dictionary):
-	player_name = name
+	player_id = name
 	player_data = data
 	
 	# get color
@@ -34,7 +35,7 @@ func setup_player(name: String, data: Dictionary):
 		forces_gfx_data[member] = gfx_data
 
 func get_figure_id(unit_id: String)->String:
-	return PLAYER_PREFFIX + player_name+'_'+unit_id
+	return PLAYER_PREFFIX + player_id+'_'+unit_id
 
 func add_figure(unit_id: String)->Node:
 	var fig: UltraMekUnit = UltraMekUnit.new()
@@ -44,7 +45,7 @@ func add_figure(unit_id: String)->Node:
 	
 func add_pointer(unit_id: String)->UltraMekDirectionPointer:
 	var pointer : UltraMekDirectionPointer = UltraMekDirectionPointer.new()
-	var pointer_name: String = pointer.get_pointer_name(player_name,unit_id)
+	var pointer_name: String = pointer.get_pointer_name(player_id,unit_id)
 	pointer.set_name(pointer_name)
 	pointers[unit_id] = pointer
 	return pointer
@@ -64,11 +65,14 @@ func get_pointer(unit_id: String)->UltraMekDirectionPointer:
 	else:
 		return null
 
-func get_player_name()->String:
-	return player_name
+func get_player_id()->String:
+	return player_id
 	
 func get_player_forces()->Dictionary:
 	return player_data[FORCES_KEY][ENTITIES_KEY]
+	
+func get_player_name()->String:
+	return player_data[PLAYER_NAME_KEY]
 
 func get_player_color(alpha:float = DEFAULT_ALPHA)->Color:
 	var color_data: Array = player_data[COLOR_KEY]

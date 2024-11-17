@@ -5,5 +5,6 @@
 	},
 "host_player":"player1",
 "board":"test/samples/snow.board",
-"game_settings":{"session_type":"hot_seat"}
+"game_settings":{"session_type":"hot_seat"},
+"rules": {"ruleset":"quickstart_rules","active_rules":{}}
 }

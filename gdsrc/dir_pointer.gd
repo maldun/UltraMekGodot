@@ -24,11 +24,11 @@ func place(player_name: String, unit_id_name: String, pos: Vector3)->void:
 	
 
 func get_mesh_pointer_name()->String:
-	return MESH_POINTER + "_" + player.get_player_name() + "_" + unit_id
+	return MESH_POINTER + "_" + player.get_player_id() + "_" + unit_id
 	
 func get_pointer_name(player_name: String = "", unit_id_: String = "")->String:
 	if player_name == "":
-		player_name = player.get_player_name()
+		player_name = player.get_player_id()
 	if unit_id_ == "":
 		unit_id_ = unit_id
 	return POINTER_PREFIX + "_" + player_name + "_" + unit_id_

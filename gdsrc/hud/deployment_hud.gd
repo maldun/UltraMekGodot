@@ -153,25 +153,32 @@ func compute_units_to_deploy(player_name: String)->int:
 func _add_entity_buttons_for_player(delta: float)->void:
 	if Global.active_player == null:
 		return
-	var player_name: String = Global.active_player.get_player_name()
-	if len(active_deployment_buttons) > 0:
-		print("Here!4")
-		if not active_deployment_buttons[0].begins_with(player_name):
-			for button_name in active_deployment_buttons:
-				var chi = deployment_buttons.get_child(button_name)
-				deployment_buttons.remove_child(chi)
-				
-	else:
-		if player_name in deployment_buttons_dict.keys():
-			for key in deployment_buttons_dict[player_name].keys():
-				var button: Button = deployment_buttons_dict[player_name][key]
-				button.set_name(player_name + "_" + key)
+	var active_player_name: String = Global.active_player.get_player_id()
+	for player_name in deployment_buttons_dict.keys():
+		for but in deployment_buttons_dict[player_name].keys():
+			var button: Button = deployment_buttons_dict[player_name][but]
+			if player_name == active_player_name:
+				button.set_name(player_name + "_" + but)
 				deployment_buttons.add_child(button)
+			else:
+				deployment_buttons.remove_child(button)
+	#if len(deployment_buttons) > 0:
+		#if not active_deployment_buttons[0].begins_with(player_name):
+			#for button_name in active_deployment_buttons:
+				#var chi = deployment_buttons.get_child(button_name)
+				#deployment_buttons.remove_child(chi)
+				#
+	#else:
+		#if player_name in deployment_buttons_dict.keys():
+			#for key in deployment_buttons_dict[player_name].keys():
+				#var button: Button = deployment_buttons_dict[player_name][key]
+				#button.set_name(player_name + "_" + key)
+				#deployment_buttons.add_child(button)
 
 func _check_current_player()->void:
 	if Global.active_player == null:
 		return
-	var player_name: String = Global.active_player.get_player_name()
+	var player_name: String = Global.active_player.get_player_id()
 	if units2deploy == -1:
 		units2deploy = compute_units_to_deploy(player_name)
 	elif units2deploy == 0:
@@ -181,7 +188,7 @@ func _check_current_player()->void:
 func _check_button_pressed(delta: float)->void:
 	if Global.active_player == null:
 		return
-	var player_name: String = Global.active_player.get_player_name()
+	var player_name: String = Global.active_player.get_player_id()
 		
 	if not player_name in deployment_buttons_dict.keys():
 		return 

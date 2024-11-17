@@ -26,10 +26,10 @@ func _ready() -> void:
 	figure_created = false
 
 func get_spawn_animation_name()->String:
-	return SPAWN_ANIMATION_PREFIX + "_" + player.get_player_name() + "_" + unit_id
+	return SPAWN_ANIMATION_PREFIX + "_" + player.get_player_id() + "_" + unit_id
 
 func get_figure_mesh_name()->String:
-	return MESH_PREFIX + "_" + player.get_player_name() + "_" + unit_id
+	return MESH_PREFIX + "_" + player.get_player_id() + "_" + unit_id
 
 func deploy(player_name: String, unit_id_name: String, pos: Vector3)->void:
 	figure_created = true

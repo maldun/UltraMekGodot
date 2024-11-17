@@ -61,7 +61,7 @@ func _process(delta: float) -> void:
 	pass
 	
 func next_player()->void:
-	var active_name: String = active_player.get_player_name()
+	var active_name: String = active_player.get_player_id()
 	var order: Array[String] = []
 	# before initiative assume all are equal ...
 	if len(player_order) == 0:
