@@ -252,6 +252,7 @@ func _initiative_process()->void:
 			initiative_hud_node.show_initiative_button(pname, initiatives[pname])
 			if len(initiatives)==len(Global.players) and len(Global.player_order)==0:
 				initiatives={}
+				initiative_hud_node.show_reroll_button()
 				
 	if game_client != null and not game_client.is_connected(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives):
 		game_client.connect(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives)
