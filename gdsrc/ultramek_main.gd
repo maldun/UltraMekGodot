@@ -236,10 +236,10 @@ func _set_initiatives(init_data: Dictionary)->void:
 	var order: Array[String] = [] 
 	for ini in init_data[Global.PLAYER_ORDER_KEY]:
 		order.append(str(ini))
-		
-	initiatives[player_name] = init
+	
 	if len(order)>0:
 		Global.player_order = order
+	initiatives[player_name] = init
 	
 func _initiative_process()->void:
 	if initiative_hud_node != null:
@@ -250,6 +250,9 @@ func _initiative_process()->void:
 		if Global.active_player.get_player_name() in initiatives.keys():
 			var pname: String = Global.active_player.get_player_name()
 			initiative_hud_node.show_initiative_button(pname, initiatives[pname])
+			if len(initiatives)==len(Global.players) and len(Global.player_order)==0:
+				initiatives={}
+				
 	if game_client != null and not game_client.is_connected(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives):
 		game_client.connect(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives)
 	

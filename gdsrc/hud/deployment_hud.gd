@@ -23,6 +23,7 @@ var current_phase: String
 var deployment_buttons_dict: Dictionary
 var active_deployment_buttons: Array = []
 var current_unit = {}
+var units2deploy: int = -1
 
 var main_node: Node = null
 var billboard_node: TextureRect = null
@@ -145,14 +146,19 @@ func _reset_hud() -> void:
 func _check_phase(delta: float):
 	pass
 
+func compute_units_to_deploy(player_name: String)->int:
+	return 1
+
 func _add_entity_buttons_for_player(delta: float)->void:
 	if Global.active_player == null:
 		return
 	var player_name: String = Global.active_player.get_player_name()
 	if len(active_deployment_buttons) > 0:
+		print("Here!4")
 		if not active_deployment_buttons[0].begins_with(player_name):
 			for button_name in active_deployment_buttons:
-				deployment_buttons.remove_child(button_name)
+				var chi = deployment_buttons.get_child(button_name)
+				deployment_buttons.remove_child(chi)
 				
 	else:
 		if player_name in deployment_buttons_dict.keys():
@@ -161,10 +167,21 @@ func _add_entity_buttons_for_player(delta: float)->void:
 				button.set_name(player_name + "_" + key)
 				deployment_buttons.add_child(button)
 
+func _check_current_player()->void:
+	if Global.active_player == null:
+		return
+	var player_name: String = Global.active_player.get_player_name()
+	if units2deploy == -1:
+		units2deploy = compute_units_to_deploy(player_name)
+	elif units2deploy == 0:
+		Global.next_player()
+		units2deploy = -1
+
 func _check_button_pressed(delta: float)->void:
 	if Global.active_player == null:
 		return
 	var player_name: String = Global.active_player.get_player_name()
+		
 	if not player_name in deployment_buttons_dict.keys():
 		return 
 	var player_button_dict: Dictionary = deployment_buttons_dict[player_name]
@@ -181,9 +198,13 @@ func _deploy_unit_recieved(player_name: String,unit_id:String, pos: Vector3)->vo
 		current_unit = {CURR_PLAYER_KEY: player_name,CURR_UNIT_KEY:unit_id,
 						CURR_MAP_POS:pos}
 
+		
+		units2deploy -= 1
+
 func _deployment_button_activate(delta: float)->void:
 	if Global.controls != null:
-		Global.controls.connect(UltraMekControls.DEPLOY_UNIT_SIGNAL,_deploy_unit_recieved)
+		if not Global.controls.is_connected(UltraMekControls.DEPLOY_UNIT_SIGNAL,_deploy_unit_recieved):
+			Global.controls.connect(UltraMekControls.DEPLOY_UNIT_SIGNAL,_deploy_unit_recieved)
 		
 func _deployment_button_press(delta: float)->void:
 	if logo != null:
@@ -192,7 +213,7 @@ func _deployment_button_press(delta: float)->void:
 			var curr_unit: String = current_unit[CURR_UNIT_KEY]
 			var curr_pos: Vector3 = current_unit[CURR_MAP_POS]
 			deploy_unit_confirmed.emit(curr_player,curr_unit,curr_pos)
-			print("Deployment confirmed!")
+			#print("Deployment confirmed!")
 			logo.disabled = true
 			current_unit = {}
 			deployment_buttons_dict[curr_player][curr_unit].disabled=true
@@ -218,5 +239,6 @@ func _process(delta: float) -> void:
 	_billboard_phase_out(delta)
 	_add_entity_buttons_for_player(delta)
 	_check_button_pressed(delta)
+	_check_current_player()
 	_deployment_button_activate(delta)
 	_deployment_button_press(delta)
