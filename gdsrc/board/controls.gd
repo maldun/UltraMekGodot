@@ -146,8 +146,9 @@ func deployment_hud_control(event: InputEvent) -> void:
 			deployment_zone_selected = false
 			deployment_dir_selected = false
 			
-	
-	deployment_hud_node.connect(DeploymentHud.DEPLOYMENT_UNIT_CONFIRMED_SIGNAL,
+	if deployment_hud_node != null and (not deployment_hud_node.is_connected(
+			DeploymentHud.DEPLOYMENT_UNIT_CONFIRMED_SIGNAL,_deployment_confirmed_button)):
+		deployment_hud_node.connect(DeploymentHud.DEPLOYMENT_UNIT_CONFIRMED_SIGNAL,
 								_deployment_confirmed_button
 	)
 

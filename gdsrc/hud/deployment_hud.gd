@@ -109,20 +109,21 @@ func _setup_deployment_hud()->void:
 	if len(Global.players)>0:
 		for player_id in Global.players.keys():
 			deployment_buttons_dict[player_id] = {}
-			var player_picture_data: Dictionary = Global.players[player_id].get_player_forces_images()
+			var player: Player = Global.players[player_id]
+			var player_picture_data: Dictionary = player.get_player_forces_images()
 			for entity_key in player_picture_data.keys():
 				var entity: Dictionary = player_picture_data[entity_key]
 				#var entity: Dictionary = player_picture_data["1"]
 				print("Player Picture Data: ",entity["gfx_2d_image"])
-				var button: Button = _setup_entity_button(entity_key,entity)
+				var button: Button = _setup_entity_button(entity_key,player,entity)
 				deployment_buttons_dict[player_id][entity_key]=button
 				
 		
-func _setup_entity_button(entity_key: String, entity: Dictionary)->Button:
+func _setup_entity_button(entity_key: String, player: Player, entity: Dictionary)->Button:
 	var entity_button: Button = Button.new()
 	var picture: String = entity["gfx_2d_image"]
 	#var texture = load("res://" + picture)
-	var player_color: Color = Color(0.5,0,0,0.5)
+	var player_color: Color = player.get_player_color()
 	var texture = UltraMekTools.color_up(picture,player_color)
 	
 	entity_button.icon = texture
@@ -198,8 +199,6 @@ func _deploy_unit_recieved(player_name: String,unit_id:String, pos: Vector3)->vo
 		current_unit = {CURR_PLAYER_KEY: player_name,CURR_UNIT_KEY:unit_id,
 						CURR_MAP_POS:pos}
 
-		
-		units2deploy -= 1
 
 func _deployment_button_activate(delta: float)->void:
 	if Global.controls != null:
@@ -217,6 +216,7 @@ func _deployment_button_press(delta: float)->void:
 			logo.disabled = true
 			current_unit = {}
 			deployment_buttons_dict[curr_player][curr_unit].disabled=true
+			units2deploy -= 1
 
 func _billboard_phase_out(delta: float)->void:
 	if init_timer >= 0:

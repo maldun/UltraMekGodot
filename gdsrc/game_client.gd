@@ -184,7 +184,7 @@ func _process_routine(delta: float) -> void:
 			if current_request != active_ids[0]:
 				current_request = active_ids[0]
 			else:
-				if time_track > DELAY_TIMEOUT*10:
+				if time_track > DELAY_TIMEOUT*2:
 					await _client.disconnect_from_host()
 					time_track = 0
 				# keeps requesting in check

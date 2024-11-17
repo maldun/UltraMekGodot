@@ -222,7 +222,7 @@ func _roll_initiative(player_name: String):
 	_send_request(UltraMekClient.INI_RQ,initiative_data)
 	Global.sound.play_dice_sound()
 
-func _finish_initiative_phase(player_name: String):
+func _finish_initiative_phase():
 	if Global.round_nr == 0:
 		Global.game_phase = Global.DEPLOYMENT_PHASE
 	else:
@@ -256,7 +256,6 @@ func _initiative_process()->void:
 	if game_client != null and not game_client.is_connected(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives):
 		game_client.connect(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives)
 	
-
 func _update_request_process()->void:
 	pass
 	#game_client.connect(UltraMekClient.DEACTIVATE_REQUEST_SIGNAL,_deactivate_request)
