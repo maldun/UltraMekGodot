@@ -5,6 +5,8 @@ const SETTINGS_KEY: String = "settings"
 const FORCES_KEY: String = "forces"
 const BOARD_KEY: String = "board"
 const PLAYER_KEY: String = "player"
+const DICES_KEY: String = "dices"
+const ROUND_KEY: String = "round_nr"
 
 const INITIATIVE_ROLLED_KEY: String = "initiative_rolled"
 const PLAYER_ORDER_KEY: String = "player_order"

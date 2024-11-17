@@ -23,6 +23,22 @@ static func load_texture_from_extern(fname: String)-> ImageTexture:
 	var texture = ImageTexture.create_from_image(image)
 	return texture
 
+static func get_dice_character(nr: int)->String:
+	if nr == 1:
+		return '⚀'
+	elif nr == 2:
+		return '⚁'
+	elif nr == 3:
+		return '⚂'
+	elif nr == 4:
+		return '⚃'
+	elif nr == 5:
+		return '⚄'
+	elif nr == 6:
+		return '⚅'
+	else:
+		return ''
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.

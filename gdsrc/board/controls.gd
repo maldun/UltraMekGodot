@@ -29,18 +29,24 @@ var menu_hidden: bool = false
 var deployment_zone_selected: bool = false
 var deployment_dir_selected: bool = false
 var dbutton_pressed: bool = false
+var in_grid: bool = false
 
 var current_player: String
 var current_unit: String
 
 var cursor_map_position: Vector3 = Vector3(0,0,0)
 var cursor_mouse_position: Vector2 = Vector2(0,0)
+var cursor_grid_position: Vector2i = Vector2i(-1,-1)
 
 # nodes
 var camera_node: Node
 var walk_light_node: Node
 var deployment_hud_node: Node = null
 var ultra_mek: UltraMekGD = UltraMekGD.new()
+
+# light colors
+const DEFAULT_COLOR: Color = Color(0.17,0.26,0.56)
+const BLOCKED_COLOR: Color = Color(1.0,0.0,0.0)
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -71,16 +77,21 @@ func walk_cursor(event) -> void:
 		var hex: Vector2i = await Global.ultra_mek_cpp.compute_board_hex_for_point(to2)
 		var pos: Vector3
 		var hex_height: float = (Global.board_data["heights"][hex[0]][hex[1]]+6)*Board.unit_height
+		cursor_grid_position = Vector2i(hex)
 		if hex[0]!=-1 and hex[1]!=-1:
 			var hex_center: Vector2 = grid_centers[hex[0]][hex[1]]
 			pos = Vector3(hex_center[0],hex_height+DY,hex_center[1])
 		elif hex[0]!=-1 and hex[1]==-1:
 			var hex_center: Vector2 = grid_centers[hex[0]][0]
+			cursor_grid_position[1] = 0
 			pos = Vector3(hex_center[0],hex_height+DY,hex_center[1])
 		elif hex[0]==-1 and hex[1]!=-1:
 			var hex_center: Vector2 = grid_centers[0][hex[1]]
+			cursor_grid_position[0] = 0
 			pos = Vector3(hex_center[0],hex_height+DY,hex_center[1])
 		else:
+			cursor_grid_position[0] = 0
+			cursor_grid_position[1] = 0
 			pos = to
 		walk_light_node.set_global_position(pos)
 		cursor_map_position = pos
@@ -120,6 +131,13 @@ func left_click_events(event: InputEvent)->void:
 func _deployment_confirmed_button(player_name: String, unit_id: String):
 	deployment_zone_selected = false
 
+func color_cursor()->void:
+	in_grid = deployment_hud_node.check_deployment_zone(current_player,current_unit,cursor_grid_position)
+	if in_grid == false:
+		walk_light_node.light_color = BLOCKED_COLOR
+	else:
+		walk_light_node.light_color = DEFAULT_COLOR
+
 func deployment_hud_control(event: InputEvent) -> void:
 	if deployment_hud_node != null:
 		var fun: Callable = func _check_deployment_button_press(player_name: String,
@@ -133,7 +151,7 @@ func deployment_hud_control(event: InputEvent) -> void:
 			fun 
 			)
 	
-	if dbutton_pressed == true:
+	if dbutton_pressed == true and in_grid == true:
 		if deployment_zone_selected == false and deployment_dir_selected == false and event.is_pressed():			
 			deployment_zone_selected = true
 			cursor_mouse_position = event.global_position
@@ -155,6 +173,8 @@ func deployment_hud_control(event: InputEvent) -> void:
 func deployment_hud_control_mouse_motion(event: InputEvent)->void:
 	if deployment_zone_selected == false:
 		walk_cursor(event)
+		if dbutton_pressed == true:
+			color_cursor()
 		
 	if (left_mouse_pressed == true and deployment_zone_selected == true
 	 and dbutton_pressed == true):

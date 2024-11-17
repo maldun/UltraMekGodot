@@ -11,8 +11,8 @@ var unit_id: String
 var current_pos: Vector3
 var pointer: MeshInstance3D
 
-func place(player_name: String, unit_id_name: String, pos: Vector3)->void:
-	player = Global.players[player_name]
+func place(player_id: String, unit_id_name: String, pos: Vector3)->void:
+	player = Global.players[player_id]
 	unit_id = unit_id_name
 	current_pos = pos
 	
@@ -26,19 +26,19 @@ func place(player_name: String, unit_id_name: String, pos: Vector3)->void:
 func get_mesh_pointer_name()->String:
 	return MESH_POINTER + "_" + player.get_player_id() + "_" + unit_id
 	
-func get_pointer_name(player_name: String = "", unit_id_: String = "")->String:
-	if player_name == "":
-		player_name = player.get_player_id()
+func get_pointer_name(player_id: String = "", unit_id_: String = "")->String:
+	if player_id == "":
+		player_id = player.get_player_id()
 	if unit_id_ == "":
 		unit_id_ = unit_id
-	return POINTER_PREFIX + "_" + player_name + "_" + unit_id_
+	return POINTER_PREFIX + "_" + player_id + "_" + unit_id_
 
 func create_direction_pointer(pos: Vector3, dir: Global.DIRECTIONS)->MeshInstance3D:
 	const HEIGHT: float = Hex.unit_height/8
 	const WIDTH: float = Hex.unit_length
 	const LENGTH: float = Hex.unit_length/8
 	const SUB_DIVISIONS: int = 2
-	var rgb = Color(0,0,5.0,0.5)
+	var rgb = Color(player.get_player_color(),0.8)
 	var mat = StandardMaterial3D.new()
 	mat.set_albedo(rgb)
 	mat.set_metallic(0.5)

@@ -5,6 +5,9 @@ const unit_length: float = Global.UNIT_LENGTH
 const unit_height: float = Global.UNIT_HEIGTH
 const PNG: String = ".png"
 
+const SIZE_X: String = "size_x"
+const SIZE_Y: String = "size_y"
+
 const top_mat = "res://grass_h_swamp_0.png"
 const color_norm = 255
 
@@ -193,13 +196,12 @@ func _rotate_deployment_pointer(player_name: String, unit_id: String, pos: Vecto
 		pointer.place(player_name,unit_id,pos)
 		pointer.set_global_position(pos)
 		
-	
 	var phi: Global.DIRECTIONS = pointer.compute_dir_from_mouse_position(mouse_pos)
 	#print("rotate pointer!",mouse_pos,phi,"atan2: ",atan2(mouse_pos[0],mouse_pos[1]))
 	pointer.rotate_pointer(phi)
 	
 func _deploy_unit(player_name: String, unit_id: String, pos: Vector3):
-	var fig: Node = Global.players[player_name].add_figure(unit_id)
+	var fig: Node = Global.players[player_name].get_figure(unit_id)
 	add_child(fig)
 	fig.set_global_position(pos)
 	fig.deploy(player_name,unit_id,pos)

@@ -31,11 +31,14 @@ var billboard_node: TextureRect = null
 var billboard_phased_out: bool = false
 var hud_setup: bool = false
 
-const DEPLOYMENT_BUTTON_PRESSED_SIGNAL = "deployment_button_pressed"
+const DEPLOYMENT_BUTTON_PRESSED_SIGNAL: String = "deployment_button_pressed"
 signal deployment_button_pressed(player_name: String, button_id: String)
 
-const DEPLOYMENT_UNIT_CONFIRMED_SIGNAL = "deploy_unit_confirmed"
+const DEPLOYMENT_UNIT_CONFIRMED_SIGNAL: String = "deploy_unit_confirmed"
 signal deploy_unit_confirmed(player_name: String,unit_id: String,unit_pos: Vector3)
+
+const DEPLOYMENT_FINISHED_SIGNAL: String = "deployment_finished_signal"
+signal deployment_finished_signal
 
 func _ready_up_node(node_name: String) -> Node:
 	var node: Node = find_child(node_name,true,false)
@@ -117,7 +120,41 @@ func _setup_deployment_hud()->void:
 				print("Player Picture Data: ",entity["gfx_2d_image"])
 				var button: Button = _setup_entity_button(entity_key,player,entity)
 				deployment_buttons_dict[player_id][entity_key]=button
-				
+
+func check_deployment_zone(player_id: String, unit_id: String, hex_coords: Vector2i)->bool:
+	var player: Player = Global.players[player_id]
+	var unit: UltraMekUnit = player.get_figure(unit_id)
+	var depl_data: Dictionary = unit.get_deployment_data()
+	var depl_width: int = int(depl_data[UltraMekUnit.DEPLOYMENT_WIDTH])
+	var depl_offset: int = int(depl_data[UltraMekUnit.DEPLOYMENT_OFFSET])
+	var depl_border: String = player.get_deployment_border()
+	var height: int = Global.board_data[Board.SIZE_Y]
+	var width: int = Global.board_data[Board.SIZE_X]
+	
+	var allowed_min_x: int = 0
+	var allowed_max_x: int = width-1
+	var allowed_min_y: int = 0
+	var allowed_max_y: int = height-1
+	
+	if "S" in depl_border:
+		allowed_min_y = depl_offset
+		allowed_max_y = depl_offset + depl_width-1
+	elif "N" in depl_border:
+		allowed_min_y = height - depl_offset - depl_width
+		allowed_max_y = height - depl_offset +1
+	
+	if "W" in depl_border:
+		allowed_min_x = depl_offset-1
+		allowed_max_x = depl_offset + depl_width-1
+	elif "E" in depl_border:
+		allowed_min_x = width - depl_offset - depl_width
+		allowed_max_x = width - depl_offset
+	#print("Check Deployment: ",hex_coords,"(",allowed_min_x,", ", allowed_max_x,") (",
+	#allowed_min_y,", ",allowed_max_y,")")
+	if allowed_min_x <= hex_coords[0] and hex_coords[0] <= allowed_max_x:
+		if allowed_min_y <= hex_coords[1] and hex_coords[1] <= allowed_max_y:
+			return true
+	return false
 		
 func _setup_entity_button(entity_key: String, player: Player, entity: Dictionary)->Button:
 	var entity_button: Button = Button.new()
@@ -144,8 +181,24 @@ func _setup_entity_button(entity_key: String, player: Player, entity: Dictionary
 func _reset_hud() -> void:
 	_make_hud_invisible(deployment_buttons)
 
+func get_nr_deployed_units(player_id: String,deployed: bool = true)->int:
+	var player: Player = Global.players[player_id]
+	var units: Dictionary = player.get_figures()
+	var count: int = 0
+	for unit_id in units.keys():
+		var unit: UltraMekUnit = units[unit_id]
+		if unit.get_deployment_status() == deployed:
+			count += 1
+	return count
+	
+
 func _check_phase(delta: float):
-	pass
+	var nr_deployed: int = 0
+	for player_id in Global.players.keys():
+		nr_deployed += get_nr_deployed_units(player_id,false)
+	if nr_deployed == 0:
+		deployment_finished_signal.emit()
+		units2deploy = -1
 
 func compute_units_to_deploy(player_name: String)->int:
 	return 1
@@ -157,23 +210,14 @@ func _add_entity_buttons_for_player(delta: float)->void:
 	for player_name in deployment_buttons_dict.keys():
 		for but in deployment_buttons_dict[player_name].keys():
 			var button: Button = deployment_buttons_dict[player_name][but]
+			var button_name: String = player_name + "_" + but
 			if player_name == active_player_name:
-				button.set_name(player_name + "_" + but)
-				deployment_buttons.add_child(button)
+				button.set_name(button_name)
+				if deployment_buttons.get_node_or_null(button_name) == null:
+						deployment_buttons.add_child(button)
 			else:
-				deployment_buttons.remove_child(button)
-	#if len(deployment_buttons) > 0:
-		#if not active_deployment_buttons[0].begins_with(player_name):
-			#for button_name in active_deployment_buttons:
-				#var chi = deployment_buttons.get_child(button_name)
-				#deployment_buttons.remove_child(chi)
-				#
-	#else:
-		#if player_name in deployment_buttons_dict.keys():
-			#for key in deployment_buttons_dict[player_name].keys():
-				#var button: Button = deployment_buttons_dict[player_name][key]
-				#button.set_name(player_name + "_" + key)
-				#deployment_buttons.add_child(button)
+				if deployment_buttons.get_node_or_null(button_name) != null:
+					deployment_buttons.remove_child(button)
 
 func _check_current_player()->void:
 	if Global.active_player == null:

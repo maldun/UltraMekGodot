@@ -53,6 +53,7 @@ var game_client: UltraMekClient = null
 var settings: Dictionary = {}
 var game_settings: Dictionary = {}
 var initiatives: Dictionary = {}
+var init_dices: Dictionary = {}
 
 # main menu buttons
 var main_menu_node: Node
@@ -212,22 +213,37 @@ func _set_new_game_info(board: String,forces: Dictionary, settings: Dictionary):
 func _deploy_unit(player_id: String, unit_id: String, pos: Vector3):
 	deploy_unit_signal.emit(player_id, unit_id,pos)
 
+func reset_initiative()->void:
+	initiatives = {}
+	Global.player_order = []
+	Global.active_player = Global.players[Global.settings.get_host_player()]
+
+func _deployment_phase_finished()->void:
+	reset_initiative()
+	Global.game_phase = Global.INITIATIVE_PHASE
+	remove_child(deployment_hud_node)
+	deployment_hud_node.queue_free()
+	Global.round_nr += 1
+
 func _deployment_process(delta: float)->void:
 	if deployment_hud_node != null:
-		deployment_hud_node.connect(DeploymentHud.DEPLOYMENT_UNIT_CONFIRMED_SIGNAL,
-		_deploy_unit)
-
+		if not deployment_hud_node.is_connected(DeploymentHud.DEPLOYMENT_UNIT_CONFIRMED_SIGNAL,_deploy_unit):
+			deployment_hud_node.connect(DeploymentHud.DEPLOYMENT_UNIT_CONFIRMED_SIGNAL,_deploy_unit)
+		if not deployment_hud_node.is_connected(DeploymentHud.DEPLOYMENT_FINISHED_SIGNAL,_deployment_phase_finished):
+			deployment_hud_node.connect(DeploymentHud.DEPLOYMENT_FINISHED_SIGNAL,_deployment_phase_finished)
+		
 func _roll_initiative(player_id: String):
-	var initiative_data: Dictionary = {Global.PLAYER_KEY:player_id}
+	var initiative_data: Dictionary = {Global.PLAYER_KEY:player_id,Global.ROUND_KEY:Global.round_nr}
 	_send_request(UltraMekClient.INI_RQ,initiative_data)
 	Global.sound.play_dice_sound()
 
 func _finish_initiative_phase():
+	Global.active_player = Global.players[Global.player_order[0]]
 	if Global.round_nr == 0:
 		Global.game_phase = Global.DEPLOYMENT_PHASE
 	else:
 		Global.game_phase = Global.MOVEMENT_PHASE
-	Global.round_nr += 1
+	
 
 func _set_initiatives(init_data: Dictionary)->void:
 	#print("Init rolled: ",init_data)
@@ -240,6 +256,7 @@ func _set_initiatives(init_data: Dictionary)->void:
 	if len(order)>0:
 		Global.player_order = order
 	initiatives[player_id] = init
+	init_dices[player_id] = init_data[Global.DICES_KEY]
 	
 func _initiative_process()->void:
 	if initiative_hud_node != null:
@@ -250,7 +267,7 @@ func _initiative_process()->void:
 		if Global.active_player.get_player_id() in initiatives.keys():
 			var pid: String = Global.active_player.get_player_id()
 			var pname: String = Global.active_player.get_player_name()
-			initiative_hud_node.show_initiative_button(pname, initiatives[pid])
+			initiative_hud_node.show_initiative_button(pname, initiatives[pid],init_dices[pid])
 			if len(initiatives)==len(Global.players) and len(Global.player_order)==0:
 				initiatives={}
 				initiative_hud_node.show_reroll_button()

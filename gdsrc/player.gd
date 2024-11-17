@@ -11,6 +11,8 @@ const COLOR_KEY: String = "color"
 const DEFAULT_ALPHA: float = 0.5
 const PLAYER_PREFFIX: String = "Player_"
 const PLAYER_NAME_KEY: String = "Name"
+const DEPLOYMENT_BORDER_KEY: String = "deployment_border"
+
 
 var player_data: Dictionary = {}
 var forces_gfx_data: Dictionary = {}
@@ -33,6 +35,7 @@ func setup_player(name: String, data: Dictionary):
 		var gfx_data_file: String = member_data[GFX_DATA_KEY]
 		var gfx_data: Dictionary = DataHandler.get_json_data(gfx_data_file)
 		forces_gfx_data[member] = gfx_data
+		add_figure(member)
 
 func get_figure_id(unit_id: String)->String:
 	return PLAYER_PREFFIX + player_id+'_'+unit_id
@@ -40,9 +43,16 @@ func get_figure_id(unit_id: String)->String:
 func add_figure(unit_id: String)->Node:
 	var fig: UltraMekUnit = UltraMekUnit.new()
 	fig.set_name(get_figure_id(unit_id))
+	fig.set_unit_data(get_entity_data(unit_id))
 	figures[unit_id] = fig
 	return fig
+
+func get_figure(unit_id: String)->Node:
+	return figures[unit_id]
 	
+func get_figures()->Dictionary:
+	return figures
+
 func add_pointer(unit_id: String)->UltraMekDirectionPointer:
 	var pointer : UltraMekDirectionPointer = UltraMekDirectionPointer.new()
 	var pointer_name: String = pointer.get_pointer_name(player_id,unit_id)
@@ -71,6 +81,9 @@ func get_player_id()->String:
 func get_player_forces()->Dictionary:
 	return player_data[FORCES_KEY][ENTITIES_KEY]
 	
+func get_entity_data(unit_id:String)->Dictionary:
+	return get_player_forces()[unit_id]
+	
 func get_player_name()->String:
 	return player_data[PLAYER_NAME_KEY]
 
@@ -92,7 +105,9 @@ func get_player_forces_images()->Dictionary:
 		
 	return pictures
 		
-
+func get_deployment_border()->String:
+	return player_data[DEPLOYMENT_BORDER_KEY
+	]
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass
