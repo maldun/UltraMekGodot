@@ -16,6 +16,15 @@ UltraMekGodot uses the following sources, which need attribution according to li
 
 - Alarm1.wav by Rotaredom -- https://freesound.org/s/686859/ -- License: Creative Commons 0
 
+### Copyright
+
+MechWarrior, BattleMech, ‘Mech and AeroTech are registered trademarks of
+The Topps Company, Inc. Original BattleTech material Copyright by Catalyst Game Labs
+All Rights Reserved. Used without permission.
+
+This program uses assets of MegaMek (https://megamek.org/) which were kindly granted with permission of the MegaMek team.
+This project is designed with MekHQ and MegaMekLab in mind for management, so definitely check them out!
+
 ## License
 UltraMekGodot is a game implementd in Godot/C++/Python (compatible with MegaMek)
 
