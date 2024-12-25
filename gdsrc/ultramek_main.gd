@@ -61,8 +61,8 @@ var connect_server_button: Node
 var new_game_button: Node
 
 # hud nodes
-var initiative_hud_node: Node
-var deployment_hud_node: Node
+var initiative_hud_node: Node = null
+var deployment_hud_node: Node = null
 
 # flags
 var main_menu_visible: bool = false
@@ -125,10 +125,22 @@ func _read_settings(filename: String)->void:
 func _hide_main_menu()->void:
 	main_menu_node.visible = false
 	main_menu_visible = false
+	if initiative_hud_node!=null:
+		add_child(initiative_hud_node)
+	elif deployment_hud_node!=null:
+		add_child(deployment_hud_node)
 
 func _show_main_menu()->void:
+	main_menu_node.move_to_front()
 	main_menu_node.visible = true
 	main_menu_visible = true
+	if initiative_hud_node!=null:
+		remove_child(initiative_hud_node)
+	elif deployment_hud_node!=null:
+		remove_child(deployment_hud_node)
+	
+	
+	
 
 func _new_game_start(fname: String,players: Dictionary,settings: Dictionary)->void:
 	_set_states()
@@ -330,13 +342,13 @@ func _set_mouse():
 func _setup_hud(delta: float) -> void:
 	_setup_deployment_hud(delta)
 	_setup_initiative_hud(delta)
-	
+
 func _setup_initiative_hud(delta: float) -> void:
 	if Global.game_phase == Global.INITIATIVE_PHASE and initiative_hud_node == null:
 		initiative_hud_node = _instantiate_phase_hud(INITIATIVE_HUD_SCENE,INITIATIVE_HUD_NAME)
 	elif Global.game_phase != Global.INITIATIVE_PHASE and initiative_hud_node != null:
 		_remove_phase_hud(initiative_hud_node)
-
+		
 func _setup_deployment_hud(delta: float)->void:
 	if Global.game_phase == Global.DEPLOYMENT_PHASE and deployment_hud_node == null:
 		deployment_hud_node = _instantiate_phase_hud(DEPLOYMENT_HUD_SCENE,DEPLOYMENT_HUD_NAME)

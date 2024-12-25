@@ -85,6 +85,9 @@ func _create_dummy(delta: float)->Node3D:
 	dummy.init_standee(texture_img,color)
 	dummy.set_name(get_figure_mesh_name())
 	return dummy
+	
+func _import_figure(delta: float):
+	pass
 
 func _deploy_time_out(delta: float)->void:
 	if figure_created == true:

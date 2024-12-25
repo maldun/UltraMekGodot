@@ -7,11 +7,14 @@ const CHASSIS_KEY: String = "chassis"
 const MODEL_KEY: String = "model"
 const GFX_DATA_KEY: String = "gfx_data"
 const IMAGE_2D_KEY: String = "gfx_2d_image"
+const ANIM_3D_KEY: String = "gfx_3d_animations"
 const COLOR_KEY: String = "color"
 const DEFAULT_ALPHA: float = 0.5
 const PLAYER_PREFFIX: String = "Player_"
 const PLAYER_NAME_KEY: String = "Name"
 const DEPLOYMENT_BORDER_KEY: String = "deployment_border"
+
+const STANDEE_GFX: String = ""
 
 
 var player_data: Dictionary = {}

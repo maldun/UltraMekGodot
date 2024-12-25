@@ -205,6 +205,12 @@ func _deploy_unit(player_name: String, unit_id: String, pos: Vector3):
 	add_child(fig)
 	fig.set_global_position(pos)
 	fig.deploy(player_name,unit_id,pos)
+	
+	#var scnf = "/home/maldun/Games/Godot/UltraMek/UltraMekGodot/units/gfx/mechs/Griffin GRF-1N/walk.tscn"
+	#var scn = load(scnf)
+	#var ins = scn.instantiate()
+	#ins.set_global_position(pos)
+	#ins.set_visible(true)
 
 func _remove_pointer(player_name: String, unit_id: String):
 	var player: Player = Global.players[player_name]
