@@ -39,6 +39,13 @@ static func get_dice_character(nr: int)->String:
 	else:
 		return ''
 
+static func unique(array: Array)->Array:
+	var unique: Array = []
+	for item in array:
+		if not unique.has(item):
+			unique.append(item)
+	return unique
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.

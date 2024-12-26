@@ -3,6 +3,7 @@ extends Node3D
 
 const SPAWN_ANIMATION_PREFIX: String = "Spawn_"
 const MESH_PREFIX: String = "Figure_Mesh_"
+const RES_PREFIX: String = "res://"
 
 const SMOKE_SCENE: String = "res://gdsrc/board/smoke_3d.tscn"
 const SMOKE3D_NODE: String = "Smoke3D"
@@ -12,11 +13,30 @@ const SMOKE_HEIGHT = 5
 
 const DEPLOYMENT_OFFSET: String = "deploymentZoneOffset"
 const DEPLOYMENT_WIDTH: String = "deploymentZoneWidth"
+const DEFAULT_CAMO: String = "Default"
+
+const ANIMATION_PLAYER: String = "AnimationPlayer"
+const IDLE_ANIM_KEY: String = "idle"
+const RUN_ANIM_KEY: String = "run"
+const WALK_ANIM_KEY: String = "walk"
+const ANIMATIONS: Array[String] = [IDLE_ANIM_KEY,RUN_ANIM_KEY,WALK_ANIM_KEY]
+const ANIM_SUFFIX: String = "_anim"
+const SCENE_SUFFIX: String = "_scene"
+
+var idle_anim: Node = null
+var run_anim: Node = null
+var walk_anim: Node = null
+
+var idle_scene: Node = null
+var run_scene: Node = null
+var walk_scene: Node = null
+var anim_scenes: Dictionary = {}
 
 var gfx_provided = false
 var figure_created: bool = false
 var figure_deployed: bool = false
 var spawn_animation: Node3D = null
+var camo_spec: String = DEFAULT_CAMO
 var player: Player
 var unit_data: Dictionary
 var unit_direction: Global.DIRECTIONS = Global.DIRECTIONS.N
@@ -25,6 +45,8 @@ var current_pos: Vector3
 var timer: float = 0
 var pointer: UltraMekDirectionPointer = null
 var smoke_height: float
+var figure_scenes: Dictionary = {}
+var figure_3D: Node = null
 
 
 # Called when the node enters the scene tree for the first time.
@@ -69,13 +91,42 @@ func get_deployment_status()->bool:
 	return figure_deployed
 
 func put_figure_on_board(delta: float)->void:
-	var figure = Node3D.new()
-	if gfx_provided == false:
-		figure = _create_dummy(delta)
+	var figure: Node3D = Node3D.new()
+	#if gfx_provided == false:
+	#	figure = _create_dummy(delta)
+	figure = _import_3d_figure()
 	add_child(figure)
 	figure.set_global_position(current_pos)
 	var phi: float = pointer.compute_pointer_rotation_y(pointer.pointer_direction)
+	phi = phi - PI/2 # correction factor
 	figure.rotate_y(phi)
+	play_animation(IDLE_ANIM_KEY)
+
+func _import_3d_figure()->Node3D:
+	var image_data: Dictionary = player.get_player_forces_images()
+	var anim_data: Dictionary = image_data[unit_id][Player.ANIM_3D_KEY]
+	var camo: Dictionary = anim_data[DEFAULT_CAMO]
+	
+	var filestack: Array = Array(camo.values())
+	filestack = UltraMekTools.unique(filestack)
+	
+	for fname in filestack:
+		var scene: PackedScene = load(fname)
+		var anim_node: Node3D = scene.instantiate()
+		add_child(anim_node)
+		for anim in ANIMATIONS:
+			var anim_fname: String = camo[anim]
+			if fname == anim_fname:
+				anim_scenes[anim] = fname
+				set(anim+SCENE_SUFFIX,scene)
+				set(anim+ANIM_SUFFIX,anim_node)
+
+	return idle_anim
+		
+func play_animation(anim_key: String)->void:
+	var anim_node: Node = get(anim_key+ANIM_SUFFIX)
+	var player_node: Node = anim_node.find_child(ANIMATION_PLAYER,true,false)
+	player_node.play(anim_key)
 
 func _create_dummy(delta: float)->Node3D:
 	var dummy = StandeePrimitive.new()

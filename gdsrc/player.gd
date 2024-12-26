@@ -104,6 +104,7 @@ func get_player_forces_images()->Dictionary:
 		picture_data[CHASSIS_KEY]=member_data[CHASSIS_KEY]
 		picture_data[MODEL_KEY]=member_data[MODEL_KEY]
 		picture_data[IMAGE_2D_KEY] = forces_gfx_data[member][IMAGE_2D_KEY]
+		picture_data[ANIM_3D_KEY] = forces_gfx_data[member][ANIM_3D_KEY]
 		pictures[member] = picture_data
 		
 	return pictures
