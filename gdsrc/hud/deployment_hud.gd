@@ -1,5 +1,5 @@
 class_name DeploymentHud
-extends Control
+extends UltraMekHud
 
 const DEPLOYMENT_HUD_NODE: String = "DeploymentHud"
 const DEPLOYMENT_BUTTON_NODE: String = "DeploymentButtons"
@@ -11,10 +11,6 @@ const CURR_PLAYER_KEY: String = "curr_player"
 const CURR_UNIT_KEY: String = "curr_unit"
 const CURR_MAP_POS: String = "current_map_pos"
 
-const TIMEOUT: float = 3
-
-var init_timer: float = -1
-
 var preparation_hud: Node
 var deployment_buttons: Node
 var logo: Button = null
@@ -24,12 +20,6 @@ var deployment_buttons_dict: Dictionary
 var active_deployment_buttons: Array = []
 var current_unit = {}
 var units2deploy: int = -1
-
-var main_node: Node = null
-var billboard_node: TextureRect = null
-
-var billboard_phased_out: bool = false
-var hud_setup: bool = false
 
 const DEPLOYMENT_BUTTON_PRESSED_SIGNAL: String = "deployment_button_pressed"
 signal deployment_button_pressed(player_name: String, button_id: String)
@@ -51,21 +41,10 @@ func _ready() -> void:
 	main_node = get_parent()
 	deployment_buttons = _ready_up_node(DEPLOYMENT_BUTTON_NODE)
 	current_phase = Global.game_phase
-	_make_start_screen()
+	billboard_node = _make_start_screen(CONTAINER_NAME,DEPLOYMENT_BILLBOARD)
 	deployment_buttons_dict = {}
 	await _make_hud_invisible(deployment_buttons,"Deployment Hud invisible!")
 	await _setup_deployment_hud()
-
-func _make_start_screen()->void:
-	init_timer = 0
-	var container: Node = find_child(CONTAINER_NAME,true,false)
-	var billboard: TextureRect = TextureRect.new()
-	var texture = UltraMekTools.load_texture_from_extern(DEPLOYMENT_BILLBOARD)
-	billboard.set_texture(texture)
-	#billboard.set_expand_mode(TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL)
-	billboard.set_stretch_mode(TextureRect.StretchMode.STRETCH_KEEP_ASPECT_CENTERED)
-	container.add_child(billboard)
-	billboard_node = billboard
 
 func _make_hud_invisible(hud_node:Node,msg: String="invisible") -> void:
 	if hud_node != null:

@@ -96,9 +96,11 @@ func put_figure_on_board(delta: float)->void:
 	#	figure = _create_dummy(delta)
 	figure = _import_3d_figure()
 	add_child(figure)
-	figure.set_global_position(current_pos)
+	var pos: Vector3 = current_pos
+	pos[1]-= UltraMekControls.DY # correction factor of correction factor
+	figure.set_global_position(pos)
 	var phi: float = pointer.compute_pointer_rotation_y(pointer.pointer_direction)
-	phi = phi - PI/2 # correction factor
+	phi = phi - PI/2 # correction factor from Blender to Godot
 	figure.rotate_y(phi)
 	play_animation(IDLE_ANIM_KEY)
 
