@@ -82,25 +82,34 @@ func _init_button_click()->void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	_billboard_phase_out(delta)
+	_billboard_phased_out(delta)
 	_init_button_process()
 
-func _billboard_phase_out(delta: float)->void:
+#func _billboard_phase_out(delta: float)->void:
+	#if init_timer >= 0:
+		#if init_timer < TIMEOUT:
+			#init_timer += delta
+		#else:
+			#if billboard_node != null:
+				#var container: Node = find_child(CONTAINER_NAME,true,false)
+				#container.remove_child(billboard_node)
+				##container.visible = false
+				#billboard_phased_out=true
+			#if billboard_phased_out==true and hud_setup==false:
+				#hud_setup = true
+			#if init_button_set == true:
+				#init_button.visible = true
+				#init_button.disabled = false
+			#init_timer = -1
+
+func _billboard_phased_out(delta: float)->void:
+	_billboard_phase_out(delta,CONTAINER_NAME,null,"",false)
 	if init_timer >= 0:
-		if init_timer < TIMEOUT:
-			init_timer += delta
-		else:
-			if billboard_node != null:
-				var container: Node = find_child(CONTAINER_NAME,true,false)
-				container.remove_child(billboard_node)
-				#container.visible = false
-				billboard_phased_out=true
-			if billboard_phased_out==true and hud_setup==false:
-				hud_setup = true
+		if init_timer >= TIMEOUT:
 			if init_button_set == true:
 				init_button.visible = true
 				init_button.disabled = false
-			init_timer = -1
+			
 
 func _init_button_process()->void:
 	_init_button_click()

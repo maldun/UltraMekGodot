@@ -46,17 +46,17 @@ func _ready() -> void:
 	await _make_hud_invisible(deployment_buttons,"Deployment Hud invisible!")
 	await _setup_deployment_hud()
 
-func _make_hud_invisible(hud_node:Node,msg: String="invisible") -> void:
-	if hud_node != null:
-		hud_node.visible = false
-		if msg != "":
-			print('Hud Event: ',msg)
-		
-func _make_hud_visible(hud_node:Node,msg: String="visible") -> void:
-	if hud_node != null:
-		hud_node.visible = true
-		if msg != "":
-			print('Hud Event: ',msg)
+#func _make_hud_invisible(hud_node:Node,msg: String="invisible") -> void:
+	#if hud_node != null:
+		#hud_node.visible = false
+		#if msg != "":
+			#print('Hud Event: ',msg)
+		#
+#func _make_hud_visible(hud_node:Node,msg: String="visible") -> void:
+	#if hud_node != null:
+		#hud_node.visible = true
+		#if msg != "":
+			#print('Hud Event: ',msg)
 
 #func _load_texture_from_extern(fname: String)-> ImageTexture:
 	#var image = Image.load_from_file(fname)
@@ -248,25 +248,10 @@ func _deployment_button_press(delta: float)->void:
 			deployment_buttons_dict[curr_player][curr_unit].disabled=true
 			units2deploy -= 1
 
-func _billboard_phase_out(delta: float)->void:
-	if init_timer >= 0:
-		if init_timer < TIMEOUT:
-			init_timer += delta
-		else:
-			if billboard_node != null:
-				var container: Node = find_child(CONTAINER_NAME,true,false)
-				container.remove_child(billboard_node)
-				container.visible = false
-				billboard_phased_out=true
-			if billboard_phased_out==true and hud_setup==false:
-				_make_hud_visible(deployment_buttons,"buttons visible!")
-				hud_setup = true
-			init_timer = -1
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	_check_phase(delta)
-	_billboard_phase_out(delta)
+	_billboard_phase_out(delta,CONTAINER_NAME,deployment_buttons,"buttons visible!")
 	_add_entity_buttons_for_player(delta)
 	_check_button_pressed(delta)
 	_check_current_player()
