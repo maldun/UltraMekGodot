@@ -30,11 +30,7 @@ signal deploy_unit_confirmed(player_name: String,unit_id: String,unit_pos: Vecto
 const DEPLOYMENT_FINISHED_SIGNAL: String = "deployment_finished_signal"
 signal deployment_finished_signal
 
-func _ready_up_node(node_name: String) -> Node:
-	var node: Node = find_child(node_name,true,false)
-	if node != null:
-		node.visible = true
-	return node
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -45,18 +41,6 @@ func _ready() -> void:
 	deployment_buttons_dict = {}
 	await _make_hud_invisible(deployment_buttons,"Deployment Hud invisible!")
 	await _setup_deployment_hud()
-
-#func _make_hud_invisible(hud_node:Node,msg: String="invisible") -> void:
-	#if hud_node != null:
-		#hud_node.visible = false
-		#if msg != "":
-			#print('Hud Event: ',msg)
-		#
-#func _make_hud_visible(hud_node:Node,msg: String="visible") -> void:
-	#if hud_node != null:
-		#hud_node.visible = true
-		#if msg != "":
-			#print('Hud Event: ',msg)
 
 #func _load_texture_from_extern(fname: String)-> ImageTexture:
 	#var image = Image.load_from_file(fname)

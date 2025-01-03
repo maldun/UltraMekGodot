@@ -46,6 +46,21 @@ static func unique(array: Array)->Array:
 			unique.append(item)
 	return unique
 
+const MECHASIDE_FONT: String = "res://assets/fonts/mechaside/Mechaside-Regular.ttf"
+const MECHASIDE_ITALIC_FONT: String = "res://assets/fonts/mechaside/Mechaside-Italic.ttf"
+
+static func setup_mechaside_label(text: String, size: int, italic: bool = false)-> Label:
+	var mechaside_font: FontFile
+	if italic:
+		mechaside_font = preload(MECHASIDE_ITALIC_FONT)
+	else:
+		mechaside_font = preload(MECHASIDE_FONT)
+	
+	var label: Label = Label.new()
+	label.add_theme_font_override("font",mechaside_font)
+	label.add_theme_font_size_override("font_size",size)
+	return label
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.
