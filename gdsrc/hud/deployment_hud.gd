@@ -15,7 +15,7 @@ var preparation_hud: Node
 var deployment_buttons: Node
 var logo: Button = null
 
-var current_phase: String
+
 var deployment_buttons_dict: Dictionary
 var active_deployment_buttons: Array = []
 var current_unit = {}

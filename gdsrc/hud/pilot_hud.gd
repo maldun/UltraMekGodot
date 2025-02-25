@@ -110,7 +110,6 @@ func setup_portrait(pilot_portrait: String)->TextureRect:
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# a simple test
-	
 	pass 
 
 

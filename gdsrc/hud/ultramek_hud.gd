@@ -12,6 +12,8 @@ var billboard_node: TextureRect = null
 var billboard_phased_out: bool = false
 # Flag to track if the HUD setup is complete
 var hud_setup: bool = false
+# variable containing the current phase
+var current_phase: String = ""
 
 # Timer variable for phased-out animation
 var init_timer: float = -1
@@ -107,6 +109,11 @@ func _ready_up_node(node_name: String) -> Node:
 	
 	# Return the found node
 	return node
+
+# Setup the pilots and units in the GUI
+func setup_pilots(player: Player) -> void:
+	pass
+	
 
 # Called when the node enters the scene tree for the first time
 func _ready() -> void:

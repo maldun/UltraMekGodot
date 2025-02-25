@@ -35,6 +35,7 @@ const BOARD3D_NODE_NAME: String = "Board3D"
 const HUD_NODE_NAME: String = "HUD"
 const DEPLOYMENT_HUD_SCENE: String = "res://gdsrc/hud/deployment_hud.tscn"
 const INITIATIVE_HUD_SCENE: String = "res://gdsrc/hud/initiative_hud.tscn"
+const MOVEMENT_HUD_SCENE: String = "res://gdsrc/hud/movement_hud.tscn"
 
 const BOARD3D_SCENE = preload("res://gdsrc/board/board3d.tscn")
 
@@ -48,6 +49,7 @@ const PLAYERS_KEY: String = "players"
 const PLAYER_KEY: String = "player"
 const INITIATIVE_HUD_NAME: String = "InitiativeHud"
 const DEPLOYMENT_HUD_NAME: String = "DeploymentHud"
+const MOVEMENT_HUD_NAME: String = "MovementHud"
 
 var game_client: UltraMekClient = null
 var settings: Dictionary = {}
@@ -63,6 +65,7 @@ var new_game_button: Node
 # hud nodes
 var initiative_hud_node: Node = null
 var deployment_hud_node: Node = null
+var movement_hud_node: Node = null
 
 # flags
 var main_menu_visible: bool = false
@@ -286,6 +289,10 @@ func _initiative_process()->void:
 				
 	if game_client != null and not game_client.is_connected(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives):
 		game_client.connect(UltraMekClient.RECIEVED_INITIATIVE_SIGNAL,_set_initiatives)
+
+func _movement_process()->void:
+	if movement_hud_node != null:
+		pass
 	
 func _update_request_process()->void:
 	pass
@@ -342,6 +349,7 @@ func _set_mouse():
 func _setup_hud(delta: float) -> void:
 	_setup_deployment_hud(delta)
 	_setup_initiative_hud(delta)
+	_setup_movement_hud(delta)
 
 func _setup_initiative_hud(delta: float) -> void:
 	if Global.game_phase == Global.INITIATIVE_PHASE and initiative_hud_node == null:
@@ -354,6 +362,14 @@ func _setup_deployment_hud(delta: float)->void:
 		deployment_hud_node = _instantiate_phase_hud(DEPLOYMENT_HUD_SCENE,DEPLOYMENT_HUD_NAME)
 	elif Global.game_phase != Global.DEPLOYMENT_PHASE and deployment_hud_node != null:
 		_remove_phase_hud(deployment_hud_node)
+		
+func _setup_movement_hud(delta: float)->void:
+	if Global.game_phase == Global.MOVEMENT_PHASE and movement_hud_node == null:
+		movement_hud_node = _instantiate_phase_hud(MOVEMENT_HUD_SCENE,MOVEMENT_HUD_NAME)
+	elif Global.game_phase != Global.MOVEMENT_PHASE and movement_hud_node != null:
+		_remove_phase_hud(movement_hud_node)
+			
+
 
 func _instantiate_phase_hud(scene_file,scene_name) -> Node:
 	var result: Node = null

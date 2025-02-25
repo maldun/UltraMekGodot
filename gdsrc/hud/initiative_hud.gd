@@ -7,7 +7,6 @@ const INIT_BUTTON_NAME: String = "InitiativeButton"
 
 var init_button: Button = null
 var init_button_set: bool = false
-var current_phase: String = ""
 var show_initiative = false
 var show_result: bool = false
 var finish_up: bool = false
