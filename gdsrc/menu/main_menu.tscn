@@ -3,10 +3,10 @@
 [ext_resource type="Texture2D" uid="uid://to2tqdgnaij1" path="res://assets/menu/UltraMek_textlogo.png" id="1_bvmuw"]
 [ext_resource type="Texture2D" uid="uid://hee3a4xiy6eu" path="res://assets/menu/connect_server.png" id="2_ui0h1"]
 [ext_resource type="Texture2D" uid="uid://btc7r41kshrui" path="res://assets/menu/quit.png" id="3_7jbf4"]
-[ext_resource type="Script" path="res://gdsrc/menu/connect_button.gd" id="3_bj8xs"]
+[ext_resource type="Script" uid="uid://d4d761d6ggh5c" path="res://gdsrc/menu/connect_button.gd" id="3_bj8xs"]
 [ext_resource type="Texture2D" uid="uid://6k3ckoyujx8r" path="res://assets/menu/new_game.png" id="4_khoq8"]
-[ext_resource type="Script" path="res://gdsrc/menu/quit_button.gd" id="4_kxjpd"]
-[ext_resource type="Script" path="res://gdsrc/menu/new_game_button.gd" id="5_3iw16"]
+[ext_resource type="Script" uid="uid://ckkm6jls1s40q" path="res://gdsrc/menu/quit_button.gd" id="4_kxjpd"]
+[ext_resource type="Script" uid="uid://buppdgeon4eiu" path="res://gdsrc/menu/new_game_button.gd" id="5_3iw16"]
 
 [sub_resource type="Shader" id="Shader_jcja6"]
 code = "shader_type canvas_item;

@@ -1,7 +1,7 @@
 [gd_scene load_steps=8 format=3 uid="uid://b4kgdygb4srs5"]
 
-[ext_resource type="Script" path="res://gdsrc/board/init_standee.gd" id="1_8jtql"]
-[ext_resource type="Script" path="res://gdsrc/board/draw_standee.gd" id="1_gohut"]
+[ext_resource type="Script" uid="uid://bdn4en5at7nh" path="res://gdsrc/board/init_standee.gd" id="1_8jtql"]
+[ext_resource type="Script" uid="uid://skos62kw8j7b" path="res://gdsrc/board/draw_standee.gd" id="1_gohut"]
 [ext_resource type="PhysicsMaterial" uid="uid://ddoyrydtetcwk" path="res://gdsrc/board/standee_primitive_3d.tres" id="2_ub7jb"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_ijed2"]

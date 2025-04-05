@@ -136,7 +136,7 @@ func create_board(data: Dictionary) -> void:
 		for j in range(size_y):
 			var x = centers[i][j][0]
 			var y = centers[i][j][1]
-			var height = heights[i][j]
+			var height: int = heights[i][j]
 			#print("Height: ",height," i: ",i," j: ",j," x: ",x," y: ",y)
 			var json_name: String = "res://assets/hexes/hexa_h{hh}.json"
 			if flat == false:

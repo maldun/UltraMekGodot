@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://wrr7vj3ftaot"]
 
-[ext_resource type="Script" path="res://gdsrc/board/draw_board.gd" id="1_atixd"]
+[ext_resource type="Script" uid="uid://belorlrq53ykb" path="res://gdsrc/board/draw_board.gd" id="1_atixd"]
 [ext_resource type="PackedScene" uid="uid://b4kgdygb4srs5" path="res://gdsrc/board/standee_primitive_3d.tscn" id="2_nmaqb"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_gad1t"]

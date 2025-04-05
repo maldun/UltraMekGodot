@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://cx5vf6mi3bg8g"]
 
-[ext_resource type="Script" path="res://gdsrc/ultramek_main.gd" id="1_he60u"]
+[ext_resource type="Script" uid="uid://bfjdu87ed4it8" path="res://gdsrc/ultramek_main.gd" id="1_he60u"]
 [ext_resource type="PackedScene" uid="uid://subml1gd2r76" path="res://gdsrc/menu/main_menu.tscn" id="2_2ibw5"]
 [ext_resource type="PackedScene" uid="uid://bx4ejyq6xfdbq" path="res://gdsrc/board/controls.tscn" id="3_65ifc"]
 

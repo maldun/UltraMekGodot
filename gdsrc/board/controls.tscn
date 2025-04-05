@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bx4ejyq6xfdbq"]
 
-[ext_resource type="Script" path="res://gdsrc/board/controls.gd" id="1_v6ot6"]
+[ext_resource type="Script" uid="uid://b6s3w55i6e31t" path="res://gdsrc/board/controls.gd" id="1_v6ot6"]
 
 [node name="controls_ Marker3D" type="Marker3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.93856, 0, 3.95731)

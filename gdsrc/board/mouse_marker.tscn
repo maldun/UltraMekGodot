@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://duihyh6ckkj42"]
 
-[ext_resource type="Script" path="res://gdsrc/board/mouse_marker.gd" id="1_ut3oa"]
+[ext_resource type="Script" uid="uid://1rgfqjefo2xu" path="res://gdsrc/board/mouse_marker.gd" id="1_ut3oa"]
 
 [node name="mouse_marker" type="Marker3D"]
 script = ExtResource("1_ut3oa")

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bqymgv27ai3in"]
 
-[ext_resource type="Script" path="res://gdsrc/hud/deployment_hud.gd" id="1_dgqsg"]
+[ext_resource type="Script" uid="uid://ctgyja4nb1xsy" path="res://gdsrc/hud/deployment_hud.gd" id="1_dgqsg"]
 
 [node name="DeploymentHud" type="Control"]
 layout_mode = 3
